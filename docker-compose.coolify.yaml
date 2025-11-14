@@ -19,11 +19,15 @@ services:
       - RAILS_ENV=production
       - NODE_ENV=production
       - INSTALLATION_ENV=docker
+      - REDIS_URL=redis://redis:6379
+      - POSTGRES_HOST=postgres
     env_file: .env
     command: ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "3000"]
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   sidekiq:
     build:
@@ -41,12 +45,17 @@ services:
       - RAILS_ENV=production
       - NODE_ENV=production
       - INSTALLATION_ENV=docker
+      - REDIS_URL=redis://redis:6379
+      - POSTGRES_HOST=postgres
     env_file: .env
     command: ["bundle", "exec", "sidekiq", "-C", "config/sidekiq.yml"]
     depends_on:
-      - postgres
-      - redis
-      - rails
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rails:
+        condition: service_started
 
   postgres:
     image: pgvector/pgvector:pg16
@@ -70,7 +79,7 @@ services:
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 10s
       timeout: 3s
       retries: 5
