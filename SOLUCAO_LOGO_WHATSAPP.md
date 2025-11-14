@@ -61,7 +61,7 @@ O `whatsapp_campaign` precisa ser habilitado **na conta específica**, não apen
 Existe uma rake task para habilitar o WhatsApp Campaign em todas as contas:
 
 ```bash
-docker exec -it <container_rails> bundle exec rake enable_whatsapp_campaign
+docker exec -it <container_rails> bundle exec rake fireagent:enable_whatsapp_campaign
 ```
 
 ### Verificar todas as features da conta:
