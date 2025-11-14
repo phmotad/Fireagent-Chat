@@ -147,9 +147,9 @@ COPY --from=pre-builder /app /app
 # Copy .git_sha file from pre-builder stage
 COPY --from=pre-builder /app/.git_sha /app/.git_sha
 
+# Make entrypoints executable if they exist
+RUN if [ -d /app/docker/entrypoints ]; then chmod +x /app/docker/entrypoints/*.sh 2>/dev/null || true; fi
+
 WORKDIR /app
 
 EXPOSE 3000
-
-# Default command - can be overridden by docker-compose or Coolify
-CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "3000"]
