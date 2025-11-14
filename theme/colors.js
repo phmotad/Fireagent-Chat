@@ -13,20 +13,36 @@ const {
   violetDark,
 } = require('@radix-ui/colors');
 
+// Paleta de cores laranja baseada em #FF5C00 (RGB: 255, 92, 0)
+const orangePalette = {
+  25: '#FFF4F0',
+  50: '#FFE8E0',
+  75: '#FFD4C0',
+  100: '#FFBFA0',
+  200: '#FF9966',
+  300: '#FF7A33',
+  400: '#FF5C00',
+  500: '#FF5C00', // Cor principal FireAgent
+  600: '#E64D00',
+  700: '#CC3D00',
+  800: '#B32E00',
+  900: '#991F00',
+};
+
 export const colors = {
   woot: {
-    25: blue.blue2,
-    50: blue.blue3,
-    75: blue.blue4,
-    100: blue.blue5,
-    200: blue.blue7,
-    300: blue.blue8,
-    400: blueDark.blue11,
-    500: blueDark.blue10,
-    600: blueDark.blue9,
-    700: blueDark.blue8,
-    800: blueDark.blue6,
-    900: blueDark.blue2,
+    25: orangePalette[25],
+    50: orangePalette[50],
+    75: orangePalette[75],
+    100: orangePalette[100],
+    200: orangePalette[200],
+    300: orangePalette[300],
+    400: orangePalette[400],
+    500: orangePalette[500], // #FF5C00 - Cor principal FireAgent
+    600: orangePalette[600],
+    700: orangePalette[700],
+    800: orangePalette[800],
+    900: orangePalette[900],
   },
   green: {
     50: greenDark.green12,
@@ -211,7 +227,7 @@ export const colors = {
     },
 
     black: '#000000',
-    brand: '#2781F6',
+    brand: '#FF5C00', // Cor principal FireAgent
     background: 'rgb(var(--background-color) / <alpha-value>)',
     solid: {
       1: 'rgb(var(--solid-1) / <alpha-value>)',
