@@ -1,5 +1,5 @@
 shared: &shared
-  version: '4.7.0'
+  version: 'FireAgent.v1.4.7.0'
 
 development:
   <<: *shared
