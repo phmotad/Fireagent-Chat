@@ -82,12 +82,14 @@ watch(
 <template>
   <div
     ref="comboboxRef"
+    data-combobox
     class="relative w-full min-w-0"
     :class="{
       'cursor-not-allowed': disabled,
       'group/combobox': !disabled,
     }"
     @click.prevent
+    @click.stop
   >
     <OnClickOutside @trigger="open = false">
       <Button

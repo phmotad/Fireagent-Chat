@@ -435,3 +435,12 @@ en:
       subject: 'Finish setting up %{custom_domain}'
     ssl_status:
       custom_domain_not_configured: 'Custom domain is not configured'
+  kanban:
+    defaults:
+      location_name: 'Default location'
+      location_description: 'Default location used by bookings'
+      rule_title: 'Default rule'
+      rule_description: 'Initial rule for bookings'
+    errors:
+      default_location_delete: 'The default location cannot be removed.'
+      default_rule_delete: 'The default rule cannot be removed.'

@@ -1,0 +1,19 @@
+{
+  "AGENDA": {
+    "TITLE": "Agenda",
+    "DESCRIPTION": "Visualize agendamentos e cards com data",
+    "CALENDAR_VIEW": "Calendário",
+    "LIST_VIEW": "Lista",
+    "LOADING": "Carregando...",
+    "NO_ITEMS": "Nenhum item encontrado",
+    "ITEM": "item",
+    "ITEMS": "itens",
+    "TODAY": "Hoje",
+    "FILTER_BOARDS": "Filtrar Boards",
+    "FILTER_BOARDS_DESCRIPTION": "Selecione os boards para exibir cards na agenda. Agendamentos sempre aparecem.",
+    "SELECT_ALL": "Selecionar Todos",
+    "DESELECT_ALL": "Desselecionar Todos",
+    "NO_BOARDS": "Nenhum board disponível"
+  }
+}
+

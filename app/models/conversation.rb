@@ -117,6 +117,7 @@ class Conversation < ApplicationRecord
   after_update_commit :execute_after_update_commit_callbacks
   after_create_commit :notify_conversation_creation
   after_create_commit :load_attributes_created_by_db_triggers
+  after_create_commit :kanban_auto_capture_after_create
 
   delegate :auto_resolve_after, to: :account
 
@@ -280,6 +281,12 @@ class Conversation < ApplicationRecord
     }.each do |event, condition|
       condition.call && dispatcher_dispatch(event, status_change)
     end
+  end
+
+  def kanban_auto_capture_after_create
+    Kanban::AutoCapture.new(account, 'conversation', self).perform
+  rescue => e
+    Rails.logger.error("[Kanban::AutoCapture] conversation_id=#{id} error=#{e.message}")
   end
 
   def dispatcher_dispatch(event_name, changed_attributes = nil)

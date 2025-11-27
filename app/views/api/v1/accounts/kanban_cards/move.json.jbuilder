@@ -1,0 +1,18 @@
+json.id @kanban_card.id
+json.title @kanban_card.title
+json.description @kanban_card.description
+json.due_date @kanban_card.due_date
+json.start_date @kanban_card.start_date
+json.end_date @kanban_card.end_date
+json.position @kanban_card.position
+json.custom_attributes @kanban_card.custom_attributes
+json.contact_id @kanban_card.contact_id
+json.conversation_id @kanban_card.conversation_id
+json.assigned_to_id @kanban_card.assigned_to_id
+json.created_by_id @kanban_card.created_by_id
+json.kanban_column_id @kanban_card.kanban_column_id
+json.kanban_board_id @kanban_card.kanban_board_id
+json.label_list @kanban_card.label_list
+json.created_at @kanban_card.created_at
+json.updated_at @kanban_card.updated_at
+

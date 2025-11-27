@@ -46,7 +46,11 @@ services:
           sleep 2; 
         done &&
         echo "Database ready. Running migrations..." &&
-        bundle exec rails db:chatwoot_prepare &&
+        bundle exec rails db:chatwoot_prepare 2>&1 || {
+          echo "Migration failed. Error details:" &&
+          bundle exec rails db:migrate:status 2>&1 || true &&
+          exit 1
+        } &&
         if [ -n "$${BRAND_ASSETS_URL}" ]; then
           deployment/extract_brand_assets.sh "$${BRAND_ASSETS_URL}" || true;
         fi &&

@@ -11,6 +11,8 @@ import {
   EXCLUDED_ATTRS,
 } from './constants.js';
 
+const emit = defineEmits(['click']);
+
 const props = defineProps({
   label: { type: [String, Number], default: '' },
   variant: {
@@ -50,12 +52,19 @@ const filteredAttrs = computed(() => {
   const standardAttrs = {};
 
   Object.entries(attrs)
-    .filter(([key]) => !EXCLUDED_ATTRS.includes(key))
+    .filter(([key]) => !EXCLUDED_ATTRS.includes(key) && key !== 'type')
     .forEach(([key, value]) => {
       standardAttrs[key] = value;
     });
 
   return standardAttrs;
+});
+
+const buttonType = computed(() => {
+  if (Object.prototype.hasOwnProperty.call(attrs, 'type')) {
+    return attrs.type;
+  }
+  return 'button';
 });
 
 const computedVariant = computed(() => {
@@ -238,7 +247,9 @@ const animationClasses = computed(() => {
 
 <template>
   <button
+    :type="buttonType"
     v-bind="filteredAttrs"
+    @click="emit('click', $event)"
     :class="{
       [STYLE_CONFIG.base]: true,
       [isLink ? linkButtonClasses : buttonClasses]: true,

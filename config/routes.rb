@@ -206,6 +206,36 @@ Rails.application.routes.draw do
             end
           end
           resources :labels, only: [:index, :show, :create, :update, :destroy]
+          resources :kanban_boards, only: [:index, :show, :create, :update, :destroy] do
+        member do
+          post :archive
+          post :unarchive
+        end
+            resources :kanban_columns, only: [:index, :show, :create, :update, :destroy]
+            resources :kanban_cards, only: [:index, :show, :create, :update, :destroy] do
+              member do
+                post :archive
+                post :unarchive
+              end
+              post :move, on: :member
+            end
+          end
+
+          resources :kanban_locations, only: [:index, :show, :create, :update, :destroy]
+          resources :kanban_schedule_rules, only: [:index, :show, :create, :update, :destroy]
+
+          # Agendamentos / Agenda para integrações (n8n, etc.)
+          namespace :kanban_schedules do
+            get :availability, to: 'availability#index'
+            get :bookings, to: 'bookings#index'
+            post :bookings, to: 'bookings#create'
+            get 'bookings/:id', to: 'bookings#show'
+            patch 'bookings/:id', to: 'bookings#update'
+            delete 'bookings/:id', to: 'bookings#destroy'
+          end
+
+          # Agenda - Visualização de agendamentos e cards
+          get :agenda, to: 'agenda#index'
 
           resources :notifications, only: [:index, :update, :destroy] do
             collection do

@@ -39,8 +39,9 @@ class ApiClient {
     return url;
   }
 
-  get() {
-    return axios.get(this.url);
+  get(path = '', options = {}) {
+    const url = path ? `${this.url}${path}` : this.url;
+    return axios.get(url, options);
   }
 
   show(id) {
@@ -49,6 +50,16 @@ class ApiClient {
 
   create(data) {
     return axios.post(this.url, data);
+  }
+
+  post(path, data) {
+    const url = path ? `${this.url}${path}` : this.url;
+    return axios.post(url, data);
+  }
+
+  patch(path, data) {
+    const url = path ? `${this.url}${path}` : this.url;
+    return axios.patch(url, data);
   }
 
   update(id, data) {

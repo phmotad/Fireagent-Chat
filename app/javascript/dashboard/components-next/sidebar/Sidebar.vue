@@ -137,6 +137,45 @@ const menuItems = computed(() => {
       },
     },
     {
+      name: 'Kanban',
+      label: t('SIDEBAR.KANBAN'),
+      icon: 'i-lucide-columns',
+      to: accountScopedRoute('kanban_index'),
+      activeOn: ['kanban_index', 'kanban_board'],
+      children: [
+        {
+          name: 'Kanban Boards',
+          label: t('SIDEBAR.KANBAN_BOARDS'),
+          icon: 'i-lucide-layout-grid',
+          to: accountScopedRoute('kanban_index'),
+          activeOn: ['kanban_index', 'kanban_board'],
+        },
+      ],
+    },
+    {
+      name: 'Agenda',
+      label: t('SIDEBAR.AGENDA'),
+      icon: 'i-lucide-calendar-days',
+      to: accountScopedRoute('agenda_index'),
+      activeOn: ['agenda_index', 'kanban_bookings'],
+      children: [
+        {
+          name: 'Agenda View',
+          label: t('SIDEBAR.AGENDA_VIEW'),
+          icon: 'i-lucide-calendar',
+          to: accountScopedRoute('agenda_index'),
+          activeOn: ['agenda_index'],
+        },
+        {
+          name: 'Agenda Bookings',
+          label: t('SIDEBAR.KANBAN_BOOKINGS'),
+          icon: 'i-lucide-calendar-plus',
+          to: accountScopedRoute('kanban_bookings'),
+          activeOn: ['kanban_bookings'],
+        },
+      ],
+    },
+    {
       name: 'Conversation',
       label: t('SIDEBAR.CONVERSATIONS'),
       icon: 'i-lucide-message-circle',
@@ -553,6 +592,13 @@ const menuItems = computed(() => {
           label: t('SIDEBAR.SECURITY'),
           icon: 'i-lucide-shield',
           to: accountScopedRoute('security_settings_index'),
+        },
+        {
+          name: 'Settings Scheduling',
+          label: t('SIDEBAR.SCHEDULING'),
+          icon: 'i-lucide-calendar',
+          to: accountScopedRoute('kanban_scheduling'),
+          activeOn: ['kanban_scheduling', 'kanban_locations_list', 'kanban_rules_list'],
         },
         {
           name: 'Settings Billing',

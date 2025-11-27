@@ -296,6 +296,7 @@
     "CURRENTLY_VIEWING_ACCOUNT": "Currently viewing:",
     "SWITCH": "Switch",
     "INBOX_VIEW": "Inbox View",
+    "KANBAN": "Kanban",
     "CONVERSATIONS": "Conversations",
     "INBOX": "My Inbox",
     "ALL_CONVERSATIONS": "All Conversations",
@@ -375,7 +376,14 @@
       "INFO_SHORT": "Automatically mark offline when you aren't using the app."
     },
     "DOCS": "Read docs",
-    "SECURITY": "Security"
+    "SECURITY": "Security",
+    "KANBAN_BOARDS": "Boards",
+    "KANBAN_BOOKINGS": "Bookings",
+    "KANBAN_LOCATIONS_SHORT": "Locations",
+    "KANBAN_RULES": "Schedule Rules",
+    "SCHEDULING": "Scheduling",
+    "AGENDA": "Agenda",
+    "AGENDA_VIEW": "View"
   },
   "BILLING_SETTINGS": {
     "TITLE": "Billing",

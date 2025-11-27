@@ -53,3 +53,10 @@ bulk_auto_assignment_job:
   cron: '*/15 * * * *'
   class: 'Inboxes::BulkAutoAssignmentJob'
   queue: scheduled_jobs
+
+# executed daily at 0200 UTC
+# to delete archived cards older than 30 days
+delete_old_archived_cards_job:
+  cron: '0 2 * * *'
+  class: 'Kanban::DeleteOldArchivedCardsJob'
+  queue: scheduled_jobs

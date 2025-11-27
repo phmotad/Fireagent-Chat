@@ -1,0 +1,12 @@
+pt-BR:
+  kanban:
+    defaults:
+      location_name: "Local padrão"
+      location_description: "Local padrão utilizado nas regras de agendamento"
+      rule_title: "Regra de atendimento padrão"
+      rule_description: "Regra inicial criada automaticamente para agendamentos"
+    errors:
+      default_location_delete: "O local padrão não pode ser removido."
+      default_rule_delete: "A regra padrão não pode ser removida."
+      rule_inactive: "Esta regra está desativada."
+

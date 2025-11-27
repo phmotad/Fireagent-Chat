@@ -61,6 +61,7 @@ const { t } = useI18n();
 
 const dialogRef = ref(null);
 const dialogContentRef = ref(null);
+const isClosing = ref(false);
 
 const maxWidthClass = computed(() => {
   const classesMap = {
@@ -80,8 +81,35 @@ const open = () => {
 };
 
 const close = () => {
+  if (isClosing.value) return; // Evitar múltiplas chamadas
+  isClosing.value = true;
+  
+  if (dialogRef.value) {
+    try {
+      dialogRef.value.close();
+    } catch (e) {
+      // Dialog já está fechado, ignorar erro
+    }
+  }
+  
+  // Reset flag após um pequeno delay
+  setTimeout(() => {
+    isClosing.value = false;
+  }, 100);
+  
   emit('close');
-  dialogRef.value?.close();
+};
+
+const handleDialogClose = () => {
+  // Quando o dialog HTML dispara o evento close, apenas emitir o evento
+  // Não chamar close() novamente para evitar loop infinito
+  if (!isClosing.value) {
+    isClosing.value = true;
+    emit('close');
+    setTimeout(() => {
+      isClosing.value = false;
+    }, 100);
+  }
 };
 
 const confirm = () => {
@@ -100,9 +128,36 @@ defineExpose({ open, close });
         maxWidthClass,
         overflowYAuto ? 'overflow-y-auto' : 'overflow-visible',
       ]"
-      @close="close"
+      @close="handleDialogClose"
     >
-      <OnClickOutside @trigger="close">
+      <OnClickOutside 
+        :ignore="[dialogContentRef]"
+        @trigger="(event) => { 
+          // Não fechar se estiver fechando
+          if (isClosing.value) return;
+          
+          // Não fechar se o clique foi em um combobox ou dropdown
+          const target = event?.target;
+          if (target) {
+            const combobox = target.closest('[data-combobox]');
+            const dropdown = target.closest('[data-dropdown]');
+            if (combobox || dropdown) {
+              console.log('[Dialog] Ignoring click inside combobox/dropdown');
+              return;
+            }
+            
+            // Não fechar se o clique foi em um elemento dentro do dialog content
+            const dialogContent = target.closest('.dialog-content, form, [data-dialog-content]');
+            if (dialogContent) {
+              console.log('[Dialog] Ignoring click inside dialog content');
+              return;
+            }
+          }
+          
+          console.log('[Dialog] Closing dialog due to outside click');
+          close(); 
+        }"
+      >
         <form
           ref="dialogContentRef"
           class="flex flex-col w-full h-auto gap-6 p-6 overflow-visible text-left align-middle transition-all duration-300 ease-in-out transform bg-n-alpha-3 backdrop-blur-[100px] shadow-xl rounded-xl"

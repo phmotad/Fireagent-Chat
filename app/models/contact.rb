@@ -62,8 +62,11 @@ class Contact < ApplicationRecord
   has_many :inboxes, through: :contact_inboxes
   has_many :messages, as: :sender, dependent: :destroy_async
   has_many :notes, dependent: :destroy_async
+  has_many :kanban_cards, dependent: :nullify
+  has_many :kanban_bookings, dependent: :destroy_async
   before_validation :prepare_contact_attributes
   after_create_commit :dispatch_create_event, :ip_lookup
+  after_create_commit :kanban_auto_capture_after_create
   after_update_commit :dispatch_update_event
   after_destroy_commit :dispatch_destroy_event
   before_save :sync_contact_attributes
@@ -244,6 +247,12 @@ class Contact < ApplicationRecord
 
   def dispatch_destroy_event
     Rails.configuration.dispatcher.dispatch(CONTACT_DELETED, Time.zone.now, contact: self)
+  end
+
+  def kanban_auto_capture_after_create
+    Kanban::AutoCapture.new(account, 'contact', self).perform
+  rescue => e
+    Rails.logger.error("[Kanban::AutoCapture] contact_id=#{id} error=#{e.message}")
   end
 end
 Contact.include_mod_with('Concerns::Contact')

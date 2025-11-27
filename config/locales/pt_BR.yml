@@ -420,3 +420,12 @@ pt_BR:
       subject: 'Termine de configurar %{custom_domain}'
     ssl_status:
       custom_domain_not_configured: 'Domínio personalizado não está configurado'
+  kanban:
+    defaults:
+      location_name: 'Local padrão'
+      location_description: 'Local padrão utilizado pelos agendamentos'
+      rule_title: 'Regra padrão'
+      rule_description: 'Regra inicial para agendamentos'
+    errors:
+      default_location_delete: 'A regra padrão não pode ser removida.'
+      default_rule_delete: 'A regra padrão não pode ser removida.'

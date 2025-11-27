@@ -1,6 +1,6 @@
 class CampaignPolicy < ApplicationPolicy
   def index?
-    @account_user.administrator?
+    @account_user.administrator? || @account_user.agent?
   end
 
   def update?
@@ -8,7 +8,7 @@ class CampaignPolicy < ApplicationPolicy
   end
 
   def show?
-    @account_user.administrator?
+    @account_user.administrator? || @account_user.agent?
   end
 
   def create?

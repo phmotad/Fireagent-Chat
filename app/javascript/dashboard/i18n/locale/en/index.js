@@ -20,6 +20,8 @@ import general from './general.json';
 import generalSettings from './generalSettings.json';
 import helpCenter from './helpCenter.json';
 import inbox from './inbox.json';
+import kanban from './kanban.json';
+import agenda from './agenda.json';
 import inboxMgmt from './inboxMgmt.json';
 import integrationApps from './integrationApps.json';
 import integrations from './integrations.json';
@@ -61,6 +63,8 @@ export default {
   ...generalSettings,
   ...helpCenter,
   ...inbox,
+  ...kanban,
+  ...agenda,
   ...inboxMgmt,
   ...integrationApps,
   ...integrations,

@@ -1,0 +1,12 @@
+en:
+  kanban:
+    defaults:
+      location_name: "Default location"
+      location_description: "Default location used by scheduling rules"
+      rule_title: "Default scheduling rule"
+      rule_description: "Initial rule automatically generated for bookings"
+    errors:
+      default_location_delete: "The default location cannot be deleted."
+      default_rule_delete: "The default rule cannot be deleted."
+      rule_inactive: "This rule is disabled."
+

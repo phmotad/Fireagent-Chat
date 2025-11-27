@@ -4,6 +4,10 @@ defineProps({
     type: Boolean,
     default: true,
   },
+  fullWidth: {
+    type: Boolean,
+    default: false,
+  },
 });
 </script>
 
@@ -11,7 +15,10 @@ defineProps({
   <div
     class="flex flex-col w-full h-full m-0 p-6 sm:py-8 lg:px-16 overflow-auto bg-n-background font-inter"
   >
-    <div class="flex items-start w-full max-w-6xl mx-auto">
+    <div
+      class="flex items-start w-full"
+      :class="[fullWidth ? '' : 'max-w-6xl mx-auto']"
+    >
       <router-view v-slot="{ Component }">
         <keep-alive v-if="keepAlive">
           <component :is="Component" />

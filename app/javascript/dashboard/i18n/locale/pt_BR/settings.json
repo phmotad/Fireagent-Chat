@@ -290,6 +290,7 @@
     "CURRENTLY_VIEWING_ACCOUNT": "Visualização atual:",
     "SWITCH": "Trocar",
     "INBOX_VIEW": "Caixa de entrada",
+    "KANBAN": "Kanban",
     "CONVERSATIONS": "Conversas",
     "INBOX": "Caixa de Entrada",
     "ALL_CONVERSATIONS": "Todas as conversas",
@@ -365,7 +366,14 @@
       "INFO_SHORT": "Marcar off-line automaticamente quando não estiver usando o aplicativo."
     },
     "DOCS": "Ler documentos",
-    "SECURITY": "Segurança"
+    "SECURITY": "Segurança",
+    "KANBAN_BOARDS": "Boards",
+    "KANBAN_BOOKINGS": "Agendamentos",
+    "KANBAN_LOCATIONS_SHORT": "Locais",
+    "KANBAN_RULES": "Regras de Agendamento",
+    "SCHEDULING": "Agendamentos",
+    "AGENDA": "Agenda",
+    "AGENDA_VIEW": "Visualização"
   },
   "BILLING_SETTINGS": {
     "TITLE": "Cobrança",

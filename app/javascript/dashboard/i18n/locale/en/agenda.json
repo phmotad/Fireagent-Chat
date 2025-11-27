@@ -1,0 +1,19 @@
+{
+  "AGENDA": {
+    "TITLE": "Agenda",
+    "DESCRIPTION": "View bookings and cards with dates",
+    "CALENDAR_VIEW": "Calendar",
+    "LIST_VIEW": "List",
+    "LOADING": "Loading...",
+    "NO_ITEMS": "No items found",
+    "ITEM": "item",
+    "ITEMS": "items",
+    "TODAY": "Today",
+    "FILTER_BOARDS": "Filter Boards",
+    "FILTER_BOARDS_DESCRIPTION": "Select boards to display cards in the agenda. Bookings always appear.",
+    "SELECT_ALL": "Select All",
+    "DESELECT_ALL": "Deselect All",
+    "NO_BOARDS": "No boards available"
+  }
+}
+

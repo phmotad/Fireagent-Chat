@@ -42,7 +42,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'search']);
 
 const { t } = useI18n();
 
@@ -51,6 +51,7 @@ const open = ref(false);
 const search = ref('');
 const dropdownRef = ref(null);
 const comboboxRef = ref(null);
+const labelCache = ref({});
 
 const filteredOptions = computed(() => {
   const searchTerm = search.value.toLowerCase();
@@ -66,11 +67,28 @@ const selectPlaceholder = computed(() => {
 const selectedTags = computed(() => {
   return selectedValues.value.map(value => {
     const option = props.options.find(opt => opt.value === value);
-    return option || { value, label: value };
+    const cachedLabel = labelCache.value[value];
+    if (option) {
+      return option;
+    }
+    if (cachedLabel) {
+      return { value, label: cachedLabel };
+    }
+    return { value, label: value };
   });
 });
 
+const cacheOptions = options => {
+  if (!Array.isArray(options) || options.length === 0) return;
+  const nextCache = { ...labelCache.value };
+  options.forEach(option => {
+    nextCache[option.value] = option.label;
+  });
+  labelCache.value = nextCache;
+};
+
 const toggleOption = option => {
+  cacheOptions([option]);
   const index = selectedValues.value.indexOf(option.value);
   if (index === -1) {
     selectedValues.value.push(option.value);
@@ -102,6 +120,14 @@ watch(
   newValue => {
     selectedValues.value = newValue;
   }
+);
+
+watch(
+  () => props.options,
+  newOptions => {
+    cacheOptions(newOptions);
+  },
+  { immediate: true, deep: true },
 );
 
 defineExpose({
@@ -164,7 +190,7 @@ defineExpose({
         :empty-state="emptyState"
         multiple
         :selected-values="selectedValues"
-        @update:search-value="search = $event"
+        @update:search-value="(value) => { search = value; emit('search', value); }"
         @select="toggleOption"
       />
 
@@ -181,3 +207,4 @@ defineExpose({
     </OnClickOutside>
   </div>
 </template>
+
