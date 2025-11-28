@@ -3,6 +3,7 @@ import SettingsContent from '../settings/Wrapper.vue';
 import SettingWrapper from '../settings/SettingsWrapper.vue';
 
 const AgentIndex = () => import('./pages/AgentIndex.vue');
+const AgentWrapper = () => import('./pages/AgentWrapper.vue');
 const AgentSettings = () => import('./pages/AgentSettings.vue');
 const AgentInboxes = () => import('./pages/AgentInboxes.vue');
 const AgentKnowledge = () => import('./pages/AgentKnowledge.vue');
@@ -41,15 +42,21 @@ export default {
                         permissions: ['administrator'],
                     },
                 },
+            ],
+        },
+        {
+            path: frontendURL('accounts/:accountId/agents/:agentId'),
+            component: AgentWrapper,
+            children: [
                 {
-                    path: ':agentId',
+                    path: '',
                     redirect: to => ({
                         name: 'agent_settings',
                         params: to.params,
                     }),
                 },
                 {
-                    path: ':agentId/settings',
+                    path: 'settings',
                     name: 'agent_settings',
                     component: AgentSettings,
                     meta: {
@@ -57,7 +64,7 @@ export default {
                     },
                 },
                 {
-                    path: ':agentId/inboxes',
+                    path: 'inboxes',
                     name: 'agent_inboxes',
                     component: AgentInboxes,
                     meta: {
@@ -65,7 +72,7 @@ export default {
                     },
                 },
                 {
-                    path: ':agentId/knowledge',
+                    path: 'knowledge',
                     name: 'agent_knowledge',
                     component: AgentKnowledge,
                     meta: {
@@ -73,7 +80,7 @@ export default {
                     },
                 },
                 {
-                    path: ':agentId/tools',
+                    path: 'tools',
                     name: 'agent_tools',
                     component: AgentTools,
                     meta: {
