@@ -39,7 +39,7 @@ class Api::V1::Accounts::AiAgentsController < Api::V1::Accounts::BaseController
   end
 
   def ai_agent_params
-    params.require(:ai_agent).permit(:name, :description, :system_prompt, :model, :temperature, :memory_window_size, :agent_bot_id, :api_key, settings: {})
+    params.require(:ai_agent).permit(:name, :description, :system_prompt, :model, :temperature, :memory_window_size, :api_key, settings: {})
   end
 
   def check_authorization

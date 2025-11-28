@@ -1,8 +1,9 @@
 class AiAgent < ApplicationRecord
   belongs_to :account
-  belongs_to :agent_bot, optional: true
   has_many :ai_agent_tools, dependent: :destroy
   has_many :ai_agent_knowledge_sources, dependent: :destroy
+  has_many :ai_agent_inboxes, dependent: :destroy
+  has_many :inboxes, through: :ai_agent_inboxes
 
   validates :name, presence: true
   validates :model, presence: true
