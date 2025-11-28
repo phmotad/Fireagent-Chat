@@ -1,21 +1,21 @@
 class AiAgentPolicy < ApplicationPolicy
   def index?
-    @account_user.administrator?
+    true  # Permite todos os usuários autenticados
   end
 
   def show?
-    @account_user.administrator?
+    true
   end
 
   def create?
-    @account_user.administrator?
+    @account_user.administrator?  # Apenas admins podem criar
   end
 
   def update?
-    @account_user.administrator?
+    @account_user.administrator?  # Apenas admins podem editar
   end
 
   def destroy?
-    @account_user.administrator?
+    @account_user.administrator?  # Apenas admins podem deletar
   end
 end
