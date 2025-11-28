@@ -96,8 +96,8 @@
 </template>
 
 <script>
+/* global axios */
 import { mapGetters } from 'vuex';
-import axios from 'axios';
 import { useAlert } from 'dashboard/composables';
 import { useAdmin } from 'dashboard/composables/useAdmin';
 import Button from 'dashboard/components-next/button/Button.vue';
