@@ -1,6 +1,6 @@
 json.id @knowledge_source.id
 json.file_path @knowledge_source.file_path
-json.content_type @knowledge_source.content_type
+json.content_type @knowledge_source.document.attached? ? @knowledge_source.document.content_type : nil
 json.status @knowledge_source.status
 json.metadata @knowledge_source.metadata
 json.created_at @knowledge_source.created_at
