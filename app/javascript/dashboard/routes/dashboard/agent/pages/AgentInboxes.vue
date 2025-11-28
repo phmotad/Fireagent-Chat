@@ -159,7 +159,7 @@ export default {
 
     async connectInbox(inboxId) {
       try {
-        this.$set(this.connecting, inboxId, true);
+        this.connecting[inboxId] = true;
 
         await axios.post(
           `/api/v1/accounts/${this.accountId}/ai_agents/${this.agentId}/inboxes`,
@@ -172,13 +172,13 @@ export default {
         useAlert('Erro ao conectar inbox');
         console.error(error);
       } finally {
-        this.$set(this.connecting, inboxId, false);
+        this.connecting[inboxId] = false;
       }
     },
 
     async disconnectInbox(inboxId) {
       try {
-        this.$set(this.disconnecting, inboxId, true);
+        this.disconnecting[inboxId] = true;
 
         await axios.delete(
           `/api/v1/accounts/${this.accountId}/ai_agents/${this.agentId}/inboxes/${inboxId}`
@@ -190,7 +190,7 @@ export default {
         useAlert('Erro ao desconectar inbox');
         console.error(error);
       } finally {
-        this.$set(this.disconnecting, inboxId, false);
+        this.disconnecting[inboxId] = false;
       }
     },
   },
