@@ -187,6 +187,28 @@ services:
       retries: 10
       start_period: 30s
 
+  fireagent-brain:
+    image: 'ghcr.io/phmotad/fireagent-chat:latest'
+    restart: always
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - POSTGRES_URL=postgresql://${SERVICE_USER_POSTGRES}:${SERVICE_PASSWORD_POSTGRES}@postgres:5432/${POSTGRES_DB:-chatwoot_production}
+    command:
+      - sh
+      - '-c'
+      - 'cd fireagent-brain && uvicorn main:app --host 0.0.0.0 --port 8000'
+    depends_on:
+      - redis
+      - postgres
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - 'wget -qO- http://localhost:8000/health || exit 1'
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
 volumes:
   storage:
   postgres:

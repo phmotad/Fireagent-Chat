@@ -6,17 +6,170 @@ class Api::V1::Accounts::AgendaController < Api::V1::Accounts::BaseController
     # Não requer permissões especiais, apenas autenticação
     # Buscar agendamentos (sempre retornar, independente de board_ids)
     bookings = fetch_bookings
-    
+
     # Buscar cards com data dos boards selecionados (apenas se board_ids for fornecido)
     cards = fetch_cards
-    
+
     render json: {
       bookings: bookings || [],
       cards: cards || []
     }
   end
 
+  # GET /api/v1/accounts/:account_id/agenda/availability
+  # Check if a time slot is available
+  def availability
+    date = params[:date]
+    time = params[:time]
+    service = params[:service]
+
+    if date.blank? || time.blank?
+      render json: { error: 'Date and time are required' }, status: :bad_request
+      return
+    end
+
+    # Combine date and time
+    datetime_str = "#{date} #{time}"
+    start_time = Time.zone.parse(datetime_str)
+
+    # Find schedule rules that match the service (if provided)
+    schedule_rules = Current.account.kanban_schedule_rules.active
+    schedule_rules = schedule_rules.where('title ILIKE ?', "%#{service}%") if service.present?
+
+    # Check availability across all matching rules
+    available_slots = []
+    is_available = false
+
+    schedule_rules.each do |rule|
+      # Count existing bookings for this time slot
+      existing_bookings = rule.kanban_bookings
+                              .active
+                              .where('start_time = ?', start_time)
+                              .count
+
+      capacity = rule.capacity || 1
+
+      if existing_bookings < capacity
+        is_available = true
+        break
+      end
+
+      # Find available slots for this rule (next 5 time slots)
+      5.times do |i|
+        slot_time = start_time + (i + 1).hours
+        slot_bookings = rule.kanban_bookings
+                            .active
+                            .where('start_time = ?', slot_time)
+                            .count
+
+        if slot_bookings < capacity
+          available_slots << slot_time.strftime('%H:%M')
+        end
+      end
+    end
+
+    render json: {
+      available: is_available,
+      available_slots: available_slots.uniq.first(5),
+      capacity_info: schedule_rules.map { |r| { service: r.title, capacity: r.capacity } }
+    }
+  end
+
+  # POST /api/v1/accounts/:account_id/agenda/appointments
+  # Create a new appointment
+  def appointments
+    date = params[:date]
+    time = params[:time]
+    service = params[:service]
+    conversation_id = params[:conversation_id]
+    notes = params[:notes]
+
+    if date.blank? || time.blank? || service.blank?
+      render json: { error: 'Date, time and service are required' }, status: :bad_request
+      return
+    end
+
+    # Combine date and time
+    datetime_str = "#{date} #{time}"
+    start_time = Time.zone.parse(datetime_str)
+
+    # Find matching schedule rule
+    schedule_rule = Current.account.kanban_schedule_rules
+                                   .active
+                                   .where('title ILIKE ?', "%#{service}%")
+                                   .first
+
+    unless schedule_rule
+      render json: { error: "Service '#{service}' not found" }, status: :not_found
+      return
+    end
+
+    # Check capacity
+    existing_bookings = schedule_rule.kanban_bookings
+                                     .active
+                                     .where('start_time = ?', start_time)
+                                     .count
+
+    capacity = schedule_rule.capacity || 1
+
+    if existing_bookings >= capacity
+      render json: {
+        error: 'Time slot is full',
+        message: 'Este horário já está lotado'
+      }, status: :unprocessable_entity
+      return
+    end
+
+    # Find or create contact from conversation
+    contact = find_contact_from_conversation(conversation_id)
+
+    unless contact
+      render json: { error: 'Contact not found' }, status: :not_found
+      return
+    end
+
+    # Create booking
+    booking = schedule_rule.kanban_bookings.new(
+      account: Current.account,
+      kanban_location: schedule_rule.kanban_location,
+      kanban_board: schedule_rule.kanban_board,
+      contact: contact,
+      start_time: start_time,
+      end_time: start_time + 1.hour, # Default 1 hour duration
+      status: 'booked',
+      source: 'ai_agent',
+      metadata: {
+        service: service,
+        notes: notes,
+        conversation_id: conversation_id
+      }
+    )
+
+    if booking.save
+      render json: {
+        id: booking.id,
+        start_time: booking.start_time.iso8601,
+        end_time: booking.end_time.iso8601,
+        service: service,
+        status: booking.status,
+        contact: {
+          id: contact.id,
+          name: contact.name
+        }
+      }, status: :created
+    else
+      render json: { error: booking.errors.full_messages.join(', ') }, status: :unprocessable_entity
+    end
+  end
+
   private
+
+  def find_contact_from_conversation(conversation_id)
+    return nil if conversation_id.blank?
+
+    conversation = Current.account.conversations.find_by(id: conversation_id)
+    conversation&.contact
+  end
 
   def fetch_bookings
     scope = Current.account.kanban_bookings

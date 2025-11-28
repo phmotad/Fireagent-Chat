@@ -10,6 +10,7 @@ import campaignsRoutes from './campaigns/campaigns.routes';
 import { routes as captainRoutes } from './captain/captain.routes';
 import kanbanRoutes from './kanban/kanban.routes';
 import agendaRoutes from './agenda/agenda.routes';
+import agentRoutes from './agent/agent.routes';
 import AppContainer from './Dashboard.vue';
 import Suspended from './suspended/Index.vue';
 import NoAccounts from './noAccounts/Index.vue';
@@ -31,6 +32,7 @@ export default {
         ...campaignsRoutes.routes,
         ...kanbanRoutes.routes,
         ...agendaRoutes.routes,
+        ...agentRoutes.routes,
       ],
     },
     {

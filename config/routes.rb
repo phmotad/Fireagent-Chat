@@ -236,6 +236,8 @@ Rails.application.routes.draw do
 
           # Agenda - Visualização de agendamentos e cards
           get :agenda, to: 'agenda#index'
+          get 'agenda/availability', to: 'agenda#availability'
+          post 'agenda/appointments', to: 'agenda#appointments'
 
           resources :notifications, only: [:index, :update, :destroy] do
             collection do
@@ -256,6 +258,17 @@ Rails.application.routes.draw do
                 delete :destroy
                 patch :update
               end
+            end
+          end
+
+          resources :ai_agents do
+            resources :ai_agent_tools, path: 'tools'
+            resources :ai_agent_knowledge, path: 'knowledge'
+
+            scope module: :ai_agents do
+              post 'test', to: 'test#create'
+              delete 'test/context', to: 'test#clear_context'
+              resources :inboxes, only: [:index, :create, :destroy]
             end
           end
 

@@ -128,6 +128,8 @@ RUN apk update && apk add --no-cache \
   imagemagick \
   git \
   vips \
+  python3 \
+  py3-pip \
   && gem install bundler
 
 COPY --from=node /usr/local/bin/node /usr/local/bin/
@@ -146,6 +148,13 @@ COPY --from=pre-builder /app /app
 
 # Copy .git_sha file from pre-builder stage
 COPY --from=pre-builder /app/.git_sha /app/.git_sha
+
+# Install Python dependencies
+COPY fireagent-brain/requirements.txt /app/fireagent-brain/requirements.txt
+RUN pip install --no-cache-dir -r /app/fireagent-brain/requirements.txt --break-system-packages
+
+# Copy Python service code
+COPY fireagent-brain /app/fireagent-brain
 
 # Make entrypoints executable if they exist
 RUN if [ -d /app/docker/entrypoints ]; then chmod +x /app/docker/entrypoints/*.sh 2>/dev/null || true; fi

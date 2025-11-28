@@ -1,5 +1,6 @@
 <script setup>
 import { h, computed, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import { provideSidebarContext } from './provider';
 import { useAccount } from 'dashboard/composables/useAccount';
 import { useKbd } from 'dashboard/composables/utils/useKbd';
@@ -34,6 +35,7 @@ const emit = defineEmits([
 ]);
 
 const { accountScopedRoute, isOnChatwootCloud } = useAccount();
+const route = useRoute();
 const store = useStore();
 const searchShortcut = useKbd([`$mod`, 'k']);
 const { t } = useI18n();
@@ -123,6 +125,57 @@ const newReportRoutes = () => [
 ];
 
 const reportRoutes = computed(() => newReportRoutes());
+
+const agentMenuItems = computed(() => {
+  const agentId = route.params.agentId;
+  const isAgentRoute = route.name && route.name.startsWith('agent_');
+
+  // Always show the main menu item
+  const menu = {
+    name: 'Agente',
+    label: 'Agente',
+    icon: 'i-lucide-bot',
+    to: accountScopedRoute('agent_index'),
+    activeOn: ['agent_index', 'agent_new', 'agent_settings', 'agent_inboxes', 'agent_knowledge', 'agent_tools'],
+  };
+
+  // Only add children if we have an agentId
+  if (agentId) {
+    menu.children = [
+      {
+        name: 'Agent Settings',
+        label: 'Configurações',
+        icon: 'i-lucide-settings',
+        to: accountScopedRoute('agent_settings', { agentId }),
+        activeOn: ['agent_settings'],
+      },
+      {
+        name: 'Agent Inboxes',
+        label: 'Caixas de Entrada',
+        icon: 'i-lucide-inbox',
+        to: accountScopedRoute('agent_inboxes', { agentId }),
+        activeOn: ['agent_inboxes'],
+      },
+      {
+        name: 'Agent Knowledge',
+        label: 'Conhecimento',
+        icon: 'i-lucide-book',
+        to: accountScopedRoute('agent_knowledge', { agentId }),
+        activeOn: ['agent_knowledge'],
+      },
+      {
+        name: 'Agent Tools',
+        label: 'Ferramentas',
+        icon: 'i-lucide-wrench',
+        to: accountScopedRoute('agent_tools', { agentId }),
+        activeOn: ['agent_tools'],
+      },
+    ];
+  }
+
+  // Return as an array to spread
+  return [menu];
+});
 
 const menuItems = computed(() => {
   return [
@@ -492,6 +545,7 @@ const menuItems = computed(() => {
         },
       ],
     },
+    ...agentMenuItems.value,
     {
       name: 'Settings',
       label: t('SIDEBAR.SETTINGS'),
