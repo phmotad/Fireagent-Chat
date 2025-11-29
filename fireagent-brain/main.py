@@ -308,21 +308,21 @@ async def ingest_document(request: IngestRequest):
 async def test_agent(request: dict):
     """
     Test endpoint for agent interaction.
-    
+
     Used by the UI to test agents without creating real conversations.
     """
     try:
         agent_id = request.get("agent_id")
-        conversation_id = request.get("conversation_id")  # Test conversation ID
+        conversation_id = request.get("conversation_id")  # Test conversation ID (string)
         message = request.get("message")
-        
+
         # Get agent configuration
         agent_data = db.get_agent_by_id(agent_id)
         if not agent_data:
             raise HTTPException(status_code=404, detail="Agent not found")
-        
+
         agent = AiAgent(**agent_data)
-        
+
         # Get tools
         tools_data = db.get_agent_tools(agent.id)
         tool_schemas = []
@@ -331,17 +331,17 @@ async def test_agent(request: dict):
             if tool_name in TOOLS:
                 tool = TOOLS[tool_name]
                 tool_schemas.append(tool.get_schema())
-        
-        # Get history for test conversation
-        history = memory_manager.get_conversation_history(
+
+        # Get history for test conversation (uses only Redis, no DB lookup)
+        history = memory_manager.get_test_conversation_history(
             conversation_id,
             agent.memory_window_size
         )
         formatted_history = memory_manager.format_for_gemini(history)
-        
+
         # Search knowledge base
         context = rag_engine.search_knowledge(agent.id, message)
-        
+
         # Generate response
         response = await gemini_client.generate_response(
             agent=agent,
@@ -350,27 +350,27 @@ async def test_agent(request: dict):
             tools=tool_schemas if tool_schemas else None,
             context=context if context else None
         )
-        
-        # Update memory
-        memory_manager.add_message(
+
+        # Update memory (uses only Redis for test conversations)
+        memory_manager.add_test_message(
             conversation_id,
             message,
             message_type=0,
             max_window=agent.memory_window_size
         )
-        memory_manager.add_message(
+        memory_manager.add_test_message(
             conversation_id,
             response.content,
             message_type=1,
             max_window=agent.memory_window_size
         )
-        
+
         return {
             "content": response.content,
             "tool_calls": [{"name": tc.name, "arguments": tc.arguments} for tc in response.tool_calls] if response.tool_calls else [],
             "context_used": bool(context)
         }
-        
+
     except Exception as e:
         logger.error(f"Error in test endpoint: {e}")
         raise HTTPException(status_code=500, detail=str(e))

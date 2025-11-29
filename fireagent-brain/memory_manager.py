@@ -99,6 +99,54 @@ class MemoryManager:
         """Clear conversation memory from Redis."""
         redis_client.clear_context(conversation_id)
 
+    def get_test_conversation_history(
+        self,
+        conversation_id: str,
+        window_size: int = 10
+    ) -> List[Dict[str, Any]]:
+        """
+        Get conversation history for test conversations (uses only Redis, no DB).
+
+        Args:
+            conversation_id: Test conversation ID (can be a string)
+            window_size: Number of messages to retrieve
+
+        Returns:
+            List of messages in chronological order
+        """
+        # For test conversations, use only Redis and treat ID as string
+        redis_messages = redis_client.get_context(conversation_id)
+
+        if redis_messages:
+            return redis_messages[-window_size:]
+
+        return []
+
+    def add_test_message(
+        self,
+        conversation_id: str,
+        content: str,
+        message_type: int,  # 0=incoming, 1=outgoing
+        max_window: int = 10
+    ):
+        """
+        Add message to test conversation memory (Redis only).
+
+        Args:
+            conversation_id: Test conversation ID (string)
+            content: Message content
+            message_type: 0 for incoming, 1 for outgoing
+            max_window: Maximum messages to keep in Redis
+        """
+        message = {
+            "content": content,
+            "message_type": message_type,
+            "sender_type": "User" if message_type == 0 else "Agent",
+            "created_at": None
+        }
+
+        redis_client.append_message(conversation_id, message, max_window)
+
 
 # Global memory manager
 memory_manager = MemoryManager()

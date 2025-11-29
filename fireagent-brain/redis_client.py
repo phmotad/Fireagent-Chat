@@ -1,7 +1,7 @@
 """Redis client for memory management."""
 import redis
 import json
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Union
 from config import settings
 import logging
 
@@ -10,11 +10,11 @@ logger = logging.getLogger(__name__)
 
 class RedisClient:
     """Redis client for conversation context."""
-    
+
     def __init__(self):
         """Initialize Redis connection."""
         self.client: Optional[redis.Redis] = None
-    
+
     def _connect(self):
         """Connect to Redis."""
         try:
@@ -28,8 +28,8 @@ class RedisClient:
         except Exception as e:
             logger.error(f"Failed to connect to Redis: {e}")
             raise
-    
-    def get_context(self, conversation_id: int) -> List[Dict[str, Any]]:
+
+    def get_context(self, conversation_id: Union[int, str]) -> List[Dict[str, Any]]:
         """Get conversation context from Redis."""
         if not self.client:
             try:
@@ -48,8 +48,8 @@ class RedisClient:
             return []
     
     def save_context(
-        self, 
-        conversation_id: int, 
+        self,
+        conversation_id: Union[int, str],
         messages: List[Dict[str, Any]],
         ttl: Optional[int] = None
     ):
@@ -59,7 +59,7 @@ class RedisClient:
                 self._connect()
             except:
                 return
-        
+
         try:
             key = f"conversation:{conversation_id}:context"
             self.client.setex(
@@ -69,24 +69,24 @@ class RedisClient:
             )
         except Exception as e:
             logger.error(f"Error saving context to Redis: {e}")
-    
+
     def append_message(
-        self, 
-        conversation_id: int, 
+        self,
+        conversation_id: Union[int, str],
         message: Dict[str, Any],
         max_messages: int = 10
     ):
         """Append message to context and maintain window size."""
         context = self.get_context(conversation_id)
         context.append(message)
-        
+
         # Keep only last N messages
         if len(context) > max_messages:
             context = context[-max_messages:]
-        
+
         self.save_context(conversation_id, context)
-    
-    def clear_context(self, conversation_id: int):
+
+    def clear_context(self, conversation_id: Union[int, str]):
         """Clear conversation context."""
         if not self.client:
             try:
