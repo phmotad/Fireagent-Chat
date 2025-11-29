@@ -128,50 +128,53 @@ const reportRoutes = computed(() => newReportRoutes());
 
 const agentMenuItems = computed(() => {
   const agentId = route.params.agentId;
-  const isAgentRoute = route.name && route.name.startsWith('agent_');
 
-  // Always show the main menu item
+  // Always show the main menu item with children
   const menu = {
     name: 'Agente',
     label: 'Agente',
     icon: 'i-lucide-bot',
     to: accountScopedRoute('agent_index'),
     activeOn: ['agent_index', 'agent_new', 'agent_settings', 'agent_inboxes', 'agent_knowledge', 'agent_tools'],
-  };
-
-  // Only add children if we have an agentId
-  if (agentId) {
-    menu.children = [
+    children: [
       {
         name: 'Agent Settings',
         label: 'Configurações',
         icon: 'i-lucide-settings',
-        to: accountScopedRoute('agent_settings', { agentId }),
+        to: agentId
+          ? accountScopedRoute('agent_settings', { agentId })
+          : accountScopedRoute('agent_index'),
         activeOn: ['agent_settings'],
       },
       {
         name: 'Agent Inboxes',
         label: 'Caixas de Entrada',
         icon: 'i-lucide-inbox',
-        to: accountScopedRoute('agent_inboxes', { agentId }),
+        to: agentId
+          ? accountScopedRoute('agent_inboxes', { agentId })
+          : accountScopedRoute('agent_index'),
         activeOn: ['agent_inboxes'],
       },
       {
         name: 'Agent Knowledge',
         label: 'Conhecimento',
         icon: 'i-lucide-book',
-        to: accountScopedRoute('agent_knowledge', { agentId }),
+        to: agentId
+          ? accountScopedRoute('agent_knowledge', { agentId })
+          : accountScopedRoute('agent_index'),
         activeOn: ['agent_knowledge'],
       },
       {
         name: 'Agent Tools',
         label: 'Ferramentas',
         icon: 'i-lucide-wrench',
-        to: accountScopedRoute('agent_tools', { agentId }),
+        to: agentId
+          ? accountScopedRoute('agent_tools', { agentId })
+          : accountScopedRoute('agent_index'),
         activeOn: ['agent_tools'],
       },
-    ];
-  }
+    ],
+  };
 
   // Return as an array to spread
   return [menu];

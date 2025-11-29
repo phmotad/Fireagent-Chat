@@ -1,17 +1,31 @@
 <template>
   <div class="flex flex-col h-full">
-    <!-- Header with Agent Name -->
+    <!-- Header with Agent Selector -->
     <div class="border-b border-n-weak bg-n-background px-6 py-4">
-      <div v-if="currentAgent" class="max-w-7xl mx-auto">
-        <h1 class="text-2xl font-semibold text-n-slate-12">
-          {{ currentAgent.name }}
-        </h1>
-        <p class="text-sm text-n-slate-11 mt-1">
-          {{ currentAgent.description }}
-        </p>
-      </div>
-      <div v-else class="max-w-7xl mx-auto">
-        <woot-loading-state message="Carregando agente..." />
+      <div class="max-w-7xl mx-auto">
+        <div class="flex items-center justify-between">
+          <div class="flex-1">
+            <div class="flex items-center gap-3">
+              <label class="text-sm font-medium text-n-slate-11">Agente:</label>
+              <select
+                v-if="agents.length"
+                v-model="selectedAgentId"
+                @change="onAgentChange"
+                class="text-lg font-semibold bg-n-background border border-n-weak rounded px-3 py-1 cursor-pointer text-n-slate-12"
+              >
+                <option v-for="agent in agents" :key="agent.id" :value="agent.id">
+                  {{ agent.name }}
+                </option>
+              </select>
+              <span v-else class="text-lg font-semibold text-n-slate-12">
+                {{ currentAgent?.name || 'Carregando...' }}
+              </span>
+            </div>
+            <p v-if="currentAgent" class="text-sm text-n-slate-11 mt-1 ml-20">
+              {{ currentAgent.description }}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -45,7 +59,9 @@ export default {
   data() {
     return {
       currentAgent: null,
+      agents: [],
       loading: false,
+      selectedAgentId: null,
     };
   },
   computed: {
@@ -86,12 +102,26 @@ export default {
   watch: {
     agentId: {
       immediate: true,
-      handler() {
+      handler(newId) {
+        this.selectedAgentId = newId;
         this.fetchAgent();
       },
     },
   },
+  mounted() {
+    this.fetchAgents();
+  },
   methods: {
+    async fetchAgents() {
+      try {
+        const response = await axios.get(
+          `/api/v1/accounts/${this.accountId}/ai_agents`
+        );
+        this.agents = response.data;
+      } catch (error) {
+        console.error('Error loading agents:', error);
+      }
+    },
     async fetchAgent() {
       if (!this.agentId) return;
 
@@ -105,6 +135,15 @@ export default {
         console.error('Error loading agent:', error);
       } finally {
         this.loading = false;
+      }
+    },
+    onAgentChange() {
+      if (this.selectedAgentId && this.selectedAgentId !== this.agentId) {
+        // Navigate to the same tab but with the new agent
+        this.$router.push({
+          name: this.$route.name,
+          params: { accountId: this.accountId, agentId: this.selectedAgentId },
+        });
       }
     },
     onTabChange(index) {
