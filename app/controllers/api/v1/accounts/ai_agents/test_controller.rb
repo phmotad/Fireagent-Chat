@@ -25,7 +25,7 @@ class Api::V1::Accounts::AiAgents::TestController < Api::V1::Accounts::BaseContr
   private
 
   def set_agent
-    @agent = Current.account.ai_agents.find(params[:agent_id])
+    @agent = Current.account.ai_agents.find(params[:ai_agent_id])
   end
 
   def send_test_message(message)

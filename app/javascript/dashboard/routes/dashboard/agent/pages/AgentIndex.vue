@@ -93,7 +93,12 @@ onMounted(() => {
 
       <table v-else class="min-w-full divide-y divide-n-weak">
         <tbody class="divide-y divide-n-weak">
-          <tr v-for="agent in agents" :key="agent.id">
+          <tr
+            v-for="agent in agents"
+            :key="agent.id"
+            class="cursor-pointer hover:bg-n-solid-2 transition-colors"
+            @click="$router.push({ name: 'agent_settings', params: { agentId: agent.id } })"
+          >
             <td class="py-4 ltr:pr-4 rtl:pl-4">
               <span class="block font-medium capitalize">{{ agent.name }}</span>
               <p class="mb-0 text-sm text-n-slate-10">{{ agent.description }}</p>
@@ -104,7 +109,7 @@ onMounted(() => {
               </div>
             </td>
 
-            <td class="py-4 flex justify-end gap-1">
+            <td class="py-4 flex justify-end gap-1" @click.stop>
               <router-link
                 :to="{
                   name: 'agent_settings',
@@ -113,7 +118,7 @@ onMounted(() => {
               >
                 <Button
                   v-if="isAdmin"
-                  v-tooltip.top="'Editar agente'"
+                  v-tooltip.top="'Configurar agente'"
                   icon="i-lucide-settings"
                   slate
                   xs
