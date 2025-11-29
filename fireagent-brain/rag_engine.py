@@ -4,6 +4,7 @@ from database import db
 from gemini_client import gemini_client
 from config import settings
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 

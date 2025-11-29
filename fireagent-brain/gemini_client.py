@@ -3,6 +3,7 @@ import google.generativeai as genai
 from typing import List, Dict, Any, Optional
 from config import settings
 from models import AiAgent, AgentResponse, ToolCall
+from embeddings import embedding_model
 import logging
 import json
 
@@ -150,24 +151,17 @@ class GeminiClient:
     
     def generate_embedding(self, text: str) -> List[float]:
         """
-        Generate embedding for text.
-        
+        Generate embedding for text using local Sentence Transformers model.
+
         Args:
             text: Text to embed
-            
+
         Returns:
             Embedding vector
         """
-        if not self.configured:
-            self.configure()
-        
         try:
-            result = genai.embed_content(
-                model=settings.embedding_model,
-                content=text,
-                task_type="retrieval_document"
-            )
-            return result['embedding']
+            # Use local embedding model (no API calls, no quota limits)
+            return embedding_model.encode(text)
         except Exception as e:
             logger.error(f"Error generating embedding: {e}")
             return []

@@ -212,22 +212,37 @@
           <woot-loading-state message="Carregando..." />
         </div>
 
-        <div v-else-if="!tools.length" class="p-8 text-center text-n-slate-10">
-          Nenhuma ferramenta configurada ainda
+        <div v-else-if="!tools.length" class="p-12 text-center">
+          <div class="max-w-sm mx-auto">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-n-solid-3 flex items-center justify-center">
+              <i class="i-lucide-wrench text-3xl text-n-slate-10"></i>
+            </div>
+            <h3 class="text-lg font-medium text-n-slate-12 mb-2">
+              Nenhuma ferramenta configurada
+            </h3>
+            <p class="text-sm text-n-slate-11">
+              Adicione ferramentas que o agente pode usar como transferir para humano, adicionar labels, etc.
+            </p>
+          </div>
         </div>
 
         <div v-else class="divide-y divide-n-weak">
           <div
             v-for="tool in tools"
             :key="tool.id"
-            class="p-4 hover:bg-n-solid-2"
+            class="p-4 hover:bg-n-solid-2 cursor-pointer"
+            @click="viewTool(tool)"
           >
             <div class="flex items-start justify-between">
               <div class="flex-1">
                 <div class="flex items-center gap-2 mb-1">
+                  <i class="i-lucide-wrench text-lg text-n-brand"></i>
                   <h4 class="font-medium text-n-slate-12">{{ tool.name }}</h4>
                   <span class="text-xs px-2 py-1 rounded bg-n-solid-3 text-n-slate-11">
                     {{ tool.tool_type }}
+                  </span>
+                  <span v-if="!tool.enabled" class="text-xs px-2 py-1 rounded bg-red-100 text-red-700">
+                    Desabilitada
                   </span>
                 </div>
                 <p class="text-sm text-n-slate-11 mb-2">
@@ -238,46 +253,62 @@
                 <div v-if="hasConditions(tool)" class="mb-2">
                   <div class="flex flex-wrap gap-1">
                     <span class="text-xs px-2 py-1 rounded bg-amber-100 text-amber-800">
+                      <i class="i-lucide-filter text-xs"></i>
                       Com critérios
                     </span>
                     <span v-if="tool.conditions?.keywords" class="text-xs px-2 py-1 rounded bg-blue-100 text-blue-800">
+                      <i class="i-lucide-key text-xs"></i>
                       Keywords
                     </span>
                     <span v-if="tool.conditions?.sentiment" class="text-xs px-2 py-1 rounded bg-purple-100 text-purple-800">
+                      <i class="i-lucide-smile text-xs"></i>
                       Sentimento
                     </span>
                     <span v-if="tool.conditions?.time_based" class="text-xs px-2 py-1 rounded bg-green-100 text-green-800">
+                      <i class="i-lucide-clock text-xs"></i>
                       Horário
                     </span>
                     <span v-if="tool.conditions?.regex" class="text-xs px-2 py-1 rounded bg-red-100 text-red-800">
+                      <i class="i-lucide-code text-xs"></i>
                       Regex
                     </span>
                   </div>
                 </div>
 
                 <details class="text-xs mb-2">
-                  <summary class="cursor-pointer text-n-slate-10 hover:text-n-slate-12">
+                  <summary class="cursor-pointer text-n-slate-10 hover:text-n-slate-12 flex items-center gap-1">
+                    <i class="i-lucide-chevron-right"></i>
                     Ver configuração
                   </summary>
                   <pre class="mt-2 p-2 bg-n-solid-2 rounded overflow-x-auto text-n-slate-11">{{ formatJSON(tool.configuration) }}</pre>
                 </details>
 
                 <details v-if="hasConditions(tool)" class="text-xs">
-                  <summary class="cursor-pointer text-n-slate-10 hover:text-n-slate-12">
+                  <summary class="cursor-pointer text-n-slate-10 hover:text-n-slate-12 flex items-center gap-1">
+                    <i class="i-lucide-chevron-right"></i>
                     Ver critérios
                   </summary>
                   <pre class="mt-2 p-2 bg-n-solid-2 rounded overflow-x-auto text-n-slate-11">{{ formatJSON(tool.conditions) }}</pre>
                 </details>
               </div>
 
-              <Button
-                variant="ghost"
-                color="ruby"
-                size="sm"
-                icon="i-lucide-trash-2"
-                label="Remover"
-                @click="removeTool(tool.id)"
-              />
+              <div class="flex gap-2" @click.stop>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon="i-lucide-eye"
+                  label="Ver"
+                  @click="viewTool(tool)"
+                />
+                <Button
+                  variant="ghost"
+                  color="ruby"
+                  size="sm"
+                  icon="i-lucide-trash-2"
+                  label="Remover"
+                  @click="removeTool(tool.id)"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -460,6 +491,11 @@ export default {
 
     hasConditions(tool) {
       return tool.conditions && Object.keys(tool.conditions).length > 0;
+    },
+
+    viewTool(tool) {
+      // TODO: Implement modal/drawer to edit tool
+      console.log('View tool:', tool);
     },
   },
 };

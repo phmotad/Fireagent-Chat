@@ -68,40 +68,86 @@
           <woot-loading-state message="Carregando..." />
         </div>
 
-        <div v-else-if="!knowledgeSources.length" class="p-8 text-center text-n-slate-10">
-          Nenhuma fonte de conhecimento adicionada ainda
+        <div v-else-if="!knowledgeSources.length" class="p-12 text-center">
+          <div class="max-w-sm mx-auto">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-n-solid-3 flex items-center justify-center">
+              <i class="i-lucide-book text-3xl text-n-slate-10"></i>
+            </div>
+            <h3 class="text-lg font-medium text-n-slate-12 mb-2">
+              Nenhuma fonte de conhecimento
+            </h3>
+            <p class="text-sm text-n-slate-11 mb-4">
+              Adicione documentos, PDFs ou URLs para treinar o agente com conhecimento específico
+            </p>
+            <p class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-3">
+              ⚠️ <strong>Nota:</strong> O processamento usa a API do Gemini. Certifique-se de ter quota disponível.
+            </p>
+          </div>
         </div>
 
         <div v-else class="divide-y divide-n-weak">
           <div
             v-for="source in knowledgeSources"
             :key="source.id"
-            class="p-4 flex items-center justify-between hover:bg-n-solid-2"
+            class="p-4 flex items-center justify-between hover:bg-n-solid-2 cursor-pointer"
+            @click="viewSource(source)"
           >
             <div class="flex-1">
-              <p class="font-medium text-n-slate-12">{{ source.file_path }}</p>
-              <p class="text-sm text-n-slate-11">
-                Status: 
-                <span
+              <div class="flex items-center gap-2 mb-1">
+                <i
+                  class="text-lg"
                   :class="{
-                    'text-green-600': source.status === 'ready',
-                    'text-yellow-600': source.status === 'processing',
-                    'text-red-600': source.status === 'failed',
+                    'i-lucide-file-text text-blue-600': source.file_path.endsWith('.txt') || source.file_path.endsWith('.md'),
+                    'i-lucide-file-type text-red-600': source.file_path.endsWith('.pdf'),
+                    'i-lucide-link text-green-600': source.file_path.startsWith('http'),
+                    'i-lucide-file text-gray-600': true
+                  }"
+                ></i>
+                <p class="font-medium text-n-slate-12">{{ source.file_path }}</p>
+              </div>
+              <div class="flex items-center gap-3 text-sm">
+                <span class="text-n-slate-11">Status:</span>
+                <span
+                  class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium"
+                  :class="{
+                    'bg-green-100 text-green-700': source.status === 'ready',
+                    'bg-yellow-100 text-yellow-700': source.status === 'processing',
+                    'bg-red-100 text-red-700': source.status === 'failed',
                   }"
                 >
+                  <i
+                    class="text-sm"
+                    :class="{
+                      'i-lucide-check-circle': source.status === 'ready',
+                      'i-lucide-loader-2 animate-spin': source.status === 'processing',
+                      'i-lucide-x-circle': source.status === 'failed',
+                    }"
+                  ></i>
                   {{ getStatusLabel(source.status) }}
                 </span>
-              </p>
+                <span v-if="source.status === 'failed'" class="text-xs text-red-600">
+                  (Possível erro de quota da API Gemini)
+                </span>
+              </div>
             </div>
 
-            <Button
-              variant="ghost"
-              color="ruby"
-              size="sm"
-              icon="i-lucide-trash-2"
-              label="Remover"
-              @click="removeKnowledge(source.id)"
-            />
+            <div class="flex gap-2" @click.stop>
+              <Button
+                variant="ghost"
+                size="sm"
+                icon="i-lucide-eye"
+                label="Ver"
+                @click="viewSource(source)"
+              />
+              <Button
+                variant="ghost"
+                color="ruby"
+                size="sm"
+                icon="i-lucide-trash-2"
+                label="Remover"
+                @click="removeKnowledge(source.id)"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -228,6 +274,11 @@ export default {
         failed: 'Falhou',
       };
       return labels[status] || status;
+    },
+
+    viewSource(source) {
+      // TODO: Implement modal/drawer to view source details
+      console.log('View source:', source);
     },
   },
 };
