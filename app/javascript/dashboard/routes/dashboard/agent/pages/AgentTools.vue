@@ -1,319 +1,140 @@
 <template>
-  <div class="flex flex-col h-full p-6">
-    <div class="max-w-5xl">
+  <div class="flex h-full">
+    <!-- Main Content -->
+    <div class="flex-1 overflow-auto p-8">
       <div class="mb-6">
-        <h2 class="text-2xl font-semibold mb-2 text-n-slate-12">Ferramentas</h2>
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-2xl font-semibold text-n-slate-12">Ferramentas do Agente</h2>
+          <Button
+            icon="i-lucide-plus"
+            label="Nova Ferramenta"
+            @click="openToolModal()"
+          />
+        </div>
         <p class="text-n-slate-11">
-          Configure as ferramentas que o agente pode usar
+          Configure as ferramentas que o agente pode usar durante as conversas
         </p>
       </div>
 
-      <!-- Add Tool -->
-      <div class="bg-n-background rounded-lg border border-n-weak p-6 mb-6">
-        <h3 class="text-lg font-medium mb-4">Adicionar Ferramenta</h3>
-
-        <form @submit.prevent="addTool" class="space-y-4">
-          <div class="grid grid-cols-2 gap-4">
-            <Input
-              v-model="newTool.name"
-              label="Nome"
-              placeholder="Ex: handover_to_human"
-            />
-
-            <div>
-              <label class="block text-sm font-medium mb-2 text-n-slate-12">Tipo</label>
-              <select
-                v-model="newTool.tool_type"
-                class="w-full px-3 py-2 border border-n-weak rounded bg-n-background text-n-slate-12"
-                required
-              >
-                <option value="chatwoot">Chatwoot</option>
-                <option value="mcp">MCP</option>
-                <option value="custom">Custom</option>
-              </select>
-            </div>
-          </div>
-
-          <Input
-            v-model="newTool.description"
-            label="Descrição"
-            placeholder="O que esta ferramenta faz?"
-          />
-
-          <div>
-            <label class="block text-sm font-medium mb-2 text-n-slate-12">Configuração (JSON)</label>
-            <textarea
-              v-model="newTool.configuration"
-              rows="4"
-              class="w-full px-3 py-2 border border-n-weak rounded bg-n-background text-n-slate-12 font-mono text-sm"
-              placeholder='{"param": "value"}'
-            />
-          </div>
-
-          <!-- Conditions Section -->
-          <div class="border-t border-n-weak pt-4">
-            <h4 class="text-md font-medium mb-3 text-n-slate-12">Critérios de Execução (Opcional)</h4>
-            <p class="text-sm text-n-slate-11 mb-4">
-              Defina quando esta ferramenta deve ser executada
-            </p>
-
-            <div class="space-y-4">
-              <!-- Keywords -->
-              <div>
-                <label class="block text-sm font-medium mb-2 text-n-slate-12">
-                  Palavras-chave (separadas por vírgula)
-                </label>
-                <Input
-                  v-model="conditions.keywords"
-                  placeholder="urgente, ajuda, problema"
-                  customInputClass="w-full"
-                />
-                <p class="text-xs text-n-slate-10 mt-1">
-                  A mensagem deve conter pelo menos uma destas palavras
-                </p>
-              </div>
-
-              <!-- Sentiment -->
-              <div>
-                <label class="block text-sm font-medium mb-2 text-n-slate-12">
-                  Sentimento
-                </label>
-                <select
-                  v-model="conditions.sentiment"
-                  class="w-full px-3 py-2 border border-n-weak rounded bg-n-background text-n-slate-12"
-                >
-                  <option value="">Qualquer</option>
-                  <option value="positive">Positivo</option>
-                  <option value="neutral">Neutro</option>
-                  <option value="negative">Negativo</option>
-                </select>
-              </div>
-
-              <!-- Unanswered Messages -->
-              <div>
-                <label class="block text-sm font-medium mb-2 text-n-slate-12">
-                  Mensagens sem resposta (mínimo)
-                </label>
-                <Input
-                  v-model.number="conditions.unanswered_messages"
-                  type="number"
-                  min="0"
-                  placeholder="3"
-                  customInputClass="w-full"
-                />
-                <p class="text-xs text-n-slate-10 mt-1">
-                  Execute apenas se houver X ou mais mensagens sem resposta
-                </p>
-              </div>
-
-              <!-- Regex Pattern -->
-              <div>
-                <label class="block text-sm font-medium mb-2 text-n-slate-12">
-                  Padrão Regex
-                </label>
-                <Input
-                  v-model="conditions.regex"
-                  placeholder="\d{3}-\d{4}"
-                  customInputClass="w-full font-mono text-sm"
-                />
-                <p class="text-xs text-n-slate-10 mt-1">
-                  Expressão regular para validar o conteúdo da mensagem
-                </p>
-              </div>
-
-              <!-- Time-based -->
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium mb-2 text-n-slate-12">
-                    Horário inicial
-                  </label>
-                  <Input
-                    v-model="conditions.start_time"
-                    type="time"
-                    customInputClass="w-full"
-                  />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium mb-2 text-n-slate-12">
-                    Horário final
-                  </label>
-                  <Input
-                    v-model="conditions.end_time"
-                    type="time"
-                    customInputClass="w-full"
-                  />
-                </div>
-              </div>
-
-              <!-- Message Count -->
-              <div>
-                <label class="block text-sm font-medium mb-2 text-n-slate-12">
-                  Contagem de mensagens (mínimo)
-                </label>
-                <Input
-                  v-model.number="conditions.message_count"
-                  type="number"
-                  min="0"
-                  placeholder="5"
-                  customInputClass="w-full"
-                />
-                <p class="text-xs text-n-slate-10 mt-1">
-                  Total de mensagens na conversa
-                </p>
-              </div>
-
-              <!-- Status -->
-              <div>
-                <label class="block text-sm font-medium mb-2 text-n-slate-12">
-                  Status da Conversa
-                </label>
-                <select
-                  v-model="conditions.status"
-                  class="w-full px-3 py-2 border border-n-weak rounded bg-n-background text-n-slate-12"
-                >
-                  <option value="">Qualquer</option>
-                  <option value="open">Aberta</option>
-                  <option value="resolved">Resolvida</option>
-                  <option value="pending">Pendente</option>
-                </select>
-              </div>
-
-              <!-- Custom Expression -->
-              <div>
-                <label class="block text-sm font-medium mb-2 text-n-slate-12">
-                  Expressão Customizada (Python)
-                </label>
-                <textarea
-                  v-model="conditions.custom_expression"
-                  rows="3"
-                  class="w-full px-3 py-2 border border-n-weak rounded bg-n-background text-n-slate-12 font-mono text-sm"
-                  placeholder="len(history) > 5 and sentiment == 'negative'"
-                />
-                <p class="text-xs text-n-slate-10 mt-1">
-                  Expressão Python avançada com acesso a: message, history, sentiment, status
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="flex justify-end">
-            <Button
-              type="submit"
-              :is-loading="adding"
-              label="Adicionar Ferramenta"
-            />
-          </div>
-        </form>
+      <!-- Tools List -->
+      <div v-if="loading" class="flex items-center justify-center py-12">
+        <woot-loading-state message="Carregando ferramentas..." />
       </div>
 
-      <!-- Tools List -->
-      <div class="bg-n-background rounded-lg border border-n-weak">
-        <div v-if="loading" class="p-8 text-center">
-          <woot-loading-state message="Carregando..." />
+      <div v-else-if="!tools.length" class="flex items-center justify-center py-20">
+        <div class="max-w-md text-center">
+          <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-n-solid-3 flex items-center justify-center">
+            <i class="i-lucide-wrench text-4xl text-n-slate-10"></i>
+          </div>
+          <h3 class="text-xl font-medium text-n-slate-12 mb-2">
+            Nenhuma ferramenta configurada
+          </h3>
+          <p class="text-n-slate-11 mb-6">
+            Adicione ferramentas para expandir as capacidades do seu agente
+          </p>
+          <Button
+            icon="i-lucide-plus"
+            label="Adicionar Primeira Ferramenta"
+            @click="openToolModal()"
+          />
         </div>
+      </div>
 
-        <div v-else-if="!tools.length" class="p-12 text-center">
-          <div class="max-w-sm mx-auto">
-            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-n-solid-3 flex items-center justify-center">
-              <i class="i-lucide-wrench text-3xl text-n-slate-10"></i>
-            </div>
-            <h3 class="text-lg font-medium text-n-slate-12 mb-2">
-              Nenhuma ferramenta configurada
+      <div v-else class="space-y-4">
+        <!-- Native Tools Section -->
+        <div v-if="nativeTools.length" class="bg-n-background rounded-lg border border-n-weak">
+          <div class="px-6 py-4 border-b border-n-weak bg-n-solid-2">
+            <h3 class="text-lg font-medium text-n-slate-12 flex items-center gap-2">
+              <i class="i-lucide-sparkles text-n-brand"></i>
+              Ferramentas Nativas
             </h3>
-            <p class="text-sm text-n-slate-11">
-              Adicione ferramentas que o agente pode usar como transferir para humano, adicionar labels, etc.
+            <p class="text-sm text-n-slate-11 mt-1">
+              Ferramentas integradas do Chatwoot
             </p>
+          </div>
+          <div class="divide-y divide-n-weak">
+            <ToolCard
+              v-for="tool in nativeTools"
+              :key="tool.id"
+              :tool="tool"
+              @edit="openToolModal(tool)"
+              @delete="confirmDelete(tool)"
+              @toggle="toggleTool(tool)"
+            />
           </div>
         </div>
 
-        <div v-else class="divide-y divide-n-weak">
-          <div
-            v-for="tool in tools"
-            :key="tool.id"
-            class="p-4 hover:bg-n-solid-2 cursor-pointer"
-            @click="viewTool(tool)"
-          >
-            <div class="flex items-start justify-between">
-              <div class="flex-1">
-                <div class="flex items-center gap-2 mb-1">
-                  <i class="i-lucide-wrench text-lg text-n-brand"></i>
-                  <h4 class="font-medium text-n-slate-12">{{ tool.name }}</h4>
-                  <span class="text-xs px-2 py-1 rounded bg-n-solid-3 text-n-slate-11">
-                    {{ tool.tool_type }}
-                  </span>
-                  <span v-if="!tool.enabled" class="text-xs px-2 py-1 rounded bg-red-100 text-red-700">
-                    Desabilitada
-                  </span>
-                </div>
-                <p class="text-sm text-n-slate-11 mb-2">
-                  {{ tool.description }}
-                </p>
+        <!-- HTTP/HTTPS Tools Section -->
+        <div v-if="httpTools.length" class="bg-n-background rounded-lg border border-n-weak">
+          <div class="px-6 py-4 border-b border-n-weak bg-n-solid-2">
+            <h3 class="text-lg font-medium text-n-slate-12 flex items-center gap-2">
+              <i class="i-lucide-globe text-blue-500"></i>
+              Ferramentas HTTP/HTTPS
+            </h3>
+            <p class="text-sm text-n-slate-11 mt-1">
+              APIs e serviços externos via HTTP
+            </p>
+          </div>
+          <div class="divide-y divide-n-weak">
+            <ToolCard
+              v-for="tool in httpTools"
+              :key="tool.id"
+              :tool="tool"
+              @edit="openToolModal(tool)"
+              @delete="confirmDelete(tool)"
+              @toggle="toggleTool(tool)"
+            />
+          </div>
+        </div>
 
-                <!-- Conditions Summary -->
-                <div v-if="hasConditions(tool)" class="mb-2">
-                  <div class="flex flex-wrap gap-1">
-                    <span class="text-xs px-2 py-1 rounded bg-amber-100 text-amber-800">
-                      <i class="i-lucide-filter text-xs"></i>
-                      Com critérios
-                    </span>
-                    <span v-if="tool.conditions?.keywords" class="text-xs px-2 py-1 rounded bg-blue-100 text-blue-800">
-                      <i class="i-lucide-key text-xs"></i>
-                      Keywords
-                    </span>
-                    <span v-if="tool.conditions?.sentiment" class="text-xs px-2 py-1 rounded bg-purple-100 text-purple-800">
-                      <i class="i-lucide-smile text-xs"></i>
-                      Sentimento
-                    </span>
-                    <span v-if="tool.conditions?.time_based" class="text-xs px-2 py-1 rounded bg-green-100 text-green-800">
-                      <i class="i-lucide-clock text-xs"></i>
-                      Horário
-                    </span>
-                    <span v-if="tool.conditions?.regex" class="text-xs px-2 py-1 rounded bg-red-100 text-red-800">
-                      <i class="i-lucide-code text-xs"></i>
-                      Regex
-                    </span>
-                  </div>
-                </div>
-
-                <details class="text-xs mb-2">
-                  <summary class="cursor-pointer text-n-slate-10 hover:text-n-slate-12 flex items-center gap-1">
-                    <i class="i-lucide-chevron-right"></i>
-                    Ver configuração
-                  </summary>
-                  <pre class="mt-2 p-2 bg-n-solid-2 rounded overflow-x-auto text-n-slate-11">{{ formatJSON(tool.configuration) }}</pre>
-                </details>
-
-                <details v-if="hasConditions(tool)" class="text-xs">
-                  <summary class="cursor-pointer text-n-slate-10 hover:text-n-slate-12 flex items-center gap-1">
-                    <i class="i-lucide-chevron-right"></i>
-                    Ver critérios
-                  </summary>
-                  <pre class="mt-2 p-2 bg-n-solid-2 rounded overflow-x-auto text-n-slate-11">{{ formatJSON(tool.conditions) }}</pre>
-                </details>
-              </div>
-
-              <div class="flex gap-2" @click.stop>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  icon="i-lucide-eye"
-                  label="Ver"
-                  @click="viewTool(tool)"
-                />
-                <Button
-                  variant="ghost"
-                  color="ruby"
-                  size="sm"
-                  icon="i-lucide-trash-2"
-                  label="Remover"
-                  @click="removeTool(tool.id)"
-                />
-              </div>
-            </div>
+        <!-- MCP Tools Section -->
+        <div v-if="mcpTools.length" class="bg-n-background rounded-lg border border-n-weak">
+          <div class="px-6 py-4 border-b border-n-weak bg-n-solid-2">
+            <h3 class="text-lg font-medium text-n-slate-12 flex items-center gap-2">
+              <i class="i-lucide-plug text-purple-500"></i>
+              Model Context Protocol (MCP)
+            </h3>
+            <p class="text-sm text-n-slate-11 mt-1">
+              Servidores MCP integrados
+            </p>
+          </div>
+          <div class="divide-y divide-n-weak">
+            <ToolCard
+              v-for="tool in mcpTools"
+              :key="tool.id"
+              :tool="tool"
+              @edit="openToolModal(tool)"
+              @delete="confirmDelete(tool)"
+              @toggle="toggleTool(tool)"
+            />
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Tool Modal -->
+    <woot-modal
+      v-model:show="showToolModal"
+      :on-close="closeToolModal"
+      size="large"
+    >
+      <ToolModal
+        :tool="selectedTool"
+        :agent-id="agentId"
+        @save="handleToolSaved"
+        @close="closeToolModal"
+      />
+    </woot-modal>
+
+    <!-- Delete Confirmation -->
+    <woot-delete-modal
+      v-model:show="showDeleteModal"
+      :title="`Excluir ${toolToDelete?.name}?`"
+      :message="`Tem certeza que deseja excluir esta ferramenta? Esta ação não pode ser desfeita.`"
+      :confirm-text="'Excluir Ferramenta'"
+      :reject-text="'Cancelar'"
+      @confirm="deleteTool"
+    />
   </div>
 </template>
 
@@ -322,42 +143,39 @@
 import { mapGetters } from 'vuex';
 import { useAlert } from 'dashboard/composables';
 import Button from 'dashboard/components-next/button/Button.vue';
-import Input from 'dashboard/components-next/input/Input.vue';
+import ToolCard from '../components/ToolCard.vue';
+import ToolModal from '../components/ToolModal.vue';
 
 export default {
   name: 'AgentTools',
   components: {
     Button,
-    Input,
+    ToolCard,
+    ToolModal,
   },
   data() {
     return {
       loading: false,
-      adding: false,
       tools: [],
-      newTool: {
-        name: '',
-        tool_type: 'chatwoot',
-        description: '',
-        configuration: '{}',
-      },
-      conditions: {
-        keywords: '',
-        sentiment: '',
-        unanswered_messages: null,
-        regex: '',
-        start_time: '',
-        end_time: '',
-        message_count: null,
-        status: '',
-        custom_expression: '',
-      },
+      showToolModal: false,
+      selectedTool: null,
+      showDeleteModal: false,
+      toolToDelete: null,
     };
   },
   computed: {
     ...mapGetters({ accountId: 'getCurrentAccountId' }),
     agentId() {
       return this.$route.params.agentId;
+    },
+    nativeTools() {
+      return this.tools.filter(t => t.tool_type === 'native');
+    },
+    httpTools() {
+      return this.tools.filter(t => t.tool_type === 'http' || t.tool_type === 'https');
+    },
+    mcpTools() {
+      return this.tools.filter(t => t.tool_type === 'mcp');
     },
   },
   mounted() {
@@ -378,124 +196,52 @@ export default {
       }
     },
 
-    async addTool() {
-      try {
-        this.adding = true;
-
-        // Validate JSON
-        let config = {};
-        try {
-          config = JSON.parse(this.newTool.configuration);
-        } catch (e) {
-          useAlert('Configuração JSON inválida');
-          return;
-        }
-
-        // Build conditions object (only include non-empty values)
-        const conditionsObj = {};
-
-        if (this.conditions.keywords.trim()) {
-          conditionsObj.keywords = this.conditions.keywords
-            .split(',')
-            .map(k => k.trim())
-            .filter(k => k);
-        }
-
-        if (this.conditions.sentiment) {
-          conditionsObj.sentiment = this.conditions.sentiment;
-        }
-
-        if (this.conditions.unanswered_messages !== null && this.conditions.unanswered_messages > 0) {
-          conditionsObj.unanswered_messages = this.conditions.unanswered_messages;
-        }
-
-        if (this.conditions.regex.trim()) {
-          conditionsObj.regex = this.conditions.regex;
-        }
-
-        if (this.conditions.start_time && this.conditions.end_time) {
-          conditionsObj.time_based = {
-            start: this.conditions.start_time,
-            end: this.conditions.end_time,
-          };
-        }
-
-        if (this.conditions.message_count !== null && this.conditions.message_count > 0) {
-          conditionsObj.message_count = this.conditions.message_count;
-        }
-
-        if (this.conditions.status) {
-          conditionsObj.status = this.conditions.status;
-        }
-
-        if (this.conditions.custom_expression.trim()) {
-          conditionsObj.custom_expression = this.conditions.custom_expression;
-        }
-
-        await axios.post(
-          `/api/v1/accounts/${this.accountId}/ai_agents/${this.agentId}/tools`,
-          {
-            ...this.newTool,
-            configuration: config,
-            conditions: conditionsObj,
-          }
-        );
-
-        // Reset form
-        this.newTool = {
-          name: '',
-          tool_type: 'chatwoot',
-          description: '',
-          configuration: '{}',
-        };
-        this.conditions = {
-          keywords: '',
-          sentiment: '',
-          unanswered_messages: null,
-          regex: '',
-          start_time: '',
-          end_time: '',
-          message_count: null,
-          status: '',
-          custom_expression: '',
-        };
-
-        useAlert('Ferramenta adicionada com sucesso');
-        this.fetchTools();
-      } catch (error) {
-        useAlert('Erro ao adicionar ferramenta');
-      } finally {
-        this.adding = false;
-      }
+    openToolModal(tool = null) {
+      this.selectedTool = tool;
+      this.showToolModal = true;
     },
 
-    async removeTool(id) {
+    closeToolModal() {
+      this.showToolModal = false;
+      this.selectedTool = null;
+    },
+
+    handleToolSaved() {
+      this.closeToolModal();
+      this.fetchTools();
+    },
+
+    confirmDelete(tool) {
+      this.toolToDelete = tool;
+      this.showDeleteModal = true;
+    },
+
+    async deleteTool() {
       try {
         await axios.delete(
-          `/api/v1/accounts/${this.accountId}/ai_agents/${this.agentId}/tools/${id}`
+          `/api/v1/accounts/${this.accountId}/ai_agents/${this.agentId}/tools/${this.toolToDelete.id}`
         );
         useAlert('Ferramenta removida com sucesso');
         this.fetchTools();
       } catch (error) {
         useAlert('Erro ao remover ferramenta');
+      } finally {
+        this.showDeleteModal = false;
+        this.toolToDelete = null;
       }
     },
 
-    formatJSON(obj) {
+    async toggleTool(tool) {
       try {
-        return JSON.stringify(obj, null, 2);
-      } catch (e) {
-        return obj;
+        await axios.patch(
+          `/api/v1/accounts/${this.accountId}/ai_agents/${this.agentId}/tools/${tool.id}`,
+          { enabled: !tool.enabled }
+        );
+        useAlert(tool.enabled ? 'Ferramenta desativada' : 'Ferramenta ativada');
+        this.fetchTools();
+      } catch (error) {
+        useAlert('Erro ao alterar ferramenta');
       }
-    },
-
-    hasConditions(tool) {
-      return tool.conditions && Object.keys(tool.conditions).length > 0;
-    },
-
-    viewTool(tool) {
-      // TODO: Implement modal/drawer to edit tool
-      console.log('View tool:', tool);
     },
   },
 };

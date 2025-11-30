@@ -1,46 +1,42 @@
 <template>
   <div class="flex flex-col h-full">
     <!-- Header with Agent Selector -->
-    <div class="border-b border-n-weak bg-n-background px-6 py-4">
-      <div class="max-w-7xl mx-auto">
-        <div class="flex items-center justify-between">
-          <div class="flex-1">
-            <div class="flex items-center gap-3">
-              <label class="text-sm font-medium text-n-slate-11">Agente:</label>
-              <select
-                v-if="agents.length"
-                v-model="selectedAgentId"
-                @change="onAgentChange"
-                class="text-lg font-semibold bg-n-background border border-n-weak rounded px-3 py-1 cursor-pointer text-n-slate-12"
-              >
-                <option v-for="agent in agents" :key="agent.id" :value="agent.id">
-                  {{ agent.name }}
-                </option>
-              </select>
-              <span v-else class="text-lg font-semibold text-n-slate-12">
-                {{ currentAgent?.name || 'Carregando...' }}
-              </span>
-            </div>
-            <p v-if="currentAgent" class="text-sm text-n-slate-11 mt-1 ml-20">
-              {{ currentAgent.description }}
-            </p>
+    <div class="border-b border-n-weak bg-n-background px-8 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex-1">
+          <div class="flex items-center gap-3">
+            <label class="text-sm font-medium text-n-slate-11">Agente:</label>
+            <select
+              v-if="agents.length"
+              v-model="selectedAgentId"
+              @change="onAgentChange"
+              class="text-lg font-semibold bg-n-background border border-n-weak rounded px-3 py-1 cursor-pointer text-n-slate-12"
+            >
+              <option v-for="agent in agents" :key="agent.id" :value="agent.id">
+                {{ agent.name }}
+              </option>
+            </select>
+            <span v-else class="text-lg font-semibold text-n-slate-12">
+              {{ currentAgent?.name || 'Carregando...' }}
+            </span>
           </div>
+          <p v-if="currentAgent" class="text-sm text-n-slate-11 mt-1 ml-20">
+            {{ currentAgent.description }}
+          </p>
         </div>
       </div>
     </div>
 
     <!-- Tabs Navigation -->
-    <div class="border-b border-n-weak bg-n-background">
-      <div class="max-w-7xl mx-auto px-6">
-        <woot-tabs :index="activeTabIndex" @change="onTabChange">
-          <woot-tabs-item
-            v-for="tab in tabs"
-            :key="tab.key"
-            :name="tab.name"
-            :show-badge="false"
-          />
-        </woot-tabs>
-      </div>
+    <div class="border-b border-n-weak bg-n-background px-8">
+      <woot-tabs :index="activeTabIndex" @change="onTabChange">
+        <woot-tabs-item
+          v-for="tab in tabs"
+          :key="tab.key"
+          :name="tab.name"
+          :show-badge="false"
+        />
+      </woot-tabs>
     </div>
 
     <!-- Tab Content -->

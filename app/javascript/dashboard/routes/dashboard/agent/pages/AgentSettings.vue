@@ -1,8 +1,8 @@
 <template>
-  <div class="flex flex-col h-full">
-    <!-- Configuration Form -->
-    <div class="flex-1 overflow-auto p-6">
-      <form @submit.prevent="saveAgent" class="max-w-4xl">
+  <div class="flex h-full gap-6 p-8">
+    <!-- Left Column: Configuration Form -->
+    <div class="flex-1 overflow-auto pr-6">
+      <form @submit.prevent="saveAgent">
         <div class="space-y-6">
           <!-- Basic Info -->
           <div class="bg-n-background rounded-lg border border-n-weak p-6">
@@ -111,19 +111,19 @@
       </form>
     </div>
 
-    <!-- Test Chat Panel (Bottom) -->
-    <div v-if="!isNew" class="border-t border-n-weak bg-n-solid-2">
-      <div class="p-4">
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="text-sm font-medium flex items-center gap-2 text-n-slate-12">
-            <i class="i-lucide-message-square text-lg" />
+    <!-- Right Column: Test Chat Panel -->
+    <div v-if="!isNew" class="w-[480px] flex flex-col border-l border-n-weak bg-n-solid-2 pl-6">
+      <div class="flex-1 flex flex-col">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-medium flex items-center gap-2 text-n-slate-12">
+            <i class="i-lucide-message-square text-xl" />
             Testar Agente
           </h3>
           <Button
             size="sm"
             variant="ghost"
             color="ruby"
-            label="Limpar Contexto"
+            label="Limpar"
             @click="clearTestContext"
           />
         </div>
@@ -131,7 +131,7 @@
         <!-- Messages -->
         <div
           ref="messagesContainer"
-          class="bg-n-background rounded-lg border border-n-weak h-64 overflow-y-auto p-4 mb-3"
+          class="flex-1 bg-n-background rounded-lg border border-n-weak overflow-y-auto p-4 mb-4"
         >
           <div
             v-for="(msg, index) in testMessages"
