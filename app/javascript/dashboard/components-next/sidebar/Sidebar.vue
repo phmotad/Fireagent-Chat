@@ -127,52 +127,43 @@ const newReportRoutes = () => [
 const reportRoutes = computed(() => newReportRoutes());
 
 const agentMenuItems = computed(() => {
-  const agentId = route.params.agentId;
-
-  // Base menu item
-  const menu = {
+  return [{
     name: 'Agente',
     label: 'Agente',
     icon: 'i-lucide-bot',
     to: accountScopedRoute('agent_index'),
     activeOn: ['agent_index', 'agent_new', 'agent_settings', 'agent_inboxes', 'agent_knowledge', 'agent_tools'],
-  };
-
-  // Only add children if agent is selected
-  if (agentId) {
-    menu.children = [
+    children: [
       {
         name: 'Agent Settings',
         label: 'Configurações',
         icon: 'i-lucide-settings',
-        to: accountScopedRoute('agent_settings', { agentId }),
+        to: accountScopedRoute('agent_settings', { agentId: route.params.agentId || 'new' }),
         activeOn: ['agent_settings'],
       },
       {
         name: 'Agent Inboxes',
         label: 'Caixas de Entrada',
         icon: 'i-lucide-inbox',
-        to: accountScopedRoute('agent_inboxes', { agentId }),
+        to: accountScopedRoute('agent_inboxes', { agentId: route.params.agentId || 'new' }),
         activeOn: ['agent_inboxes'],
       },
       {
         name: 'Agent Knowledge',
         label: 'Conhecimento',
         icon: 'i-lucide-book',
-        to: accountScopedRoute('agent_knowledge', { agentId }),
+        to: accountScopedRoute('agent_knowledge', { agentId: route.params.agentId || 'new' }),
         activeOn: ['agent_knowledge'],
       },
       {
         name: 'Agent Tools',
         label: 'Ferramentas',
         icon: 'i-lucide-wrench',
-        to: accountScopedRoute('agent_tools', { agentId }),
+        to: accountScopedRoute('agent_tools', { agentId: route.params.agentId || 'new' }),
         activeOn: ['agent_tools'],
       },
-    ];
-  }
-
-  return [menu];
+    ],
+  }];
 });
 
 const menuItems = computed(() => {

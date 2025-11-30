@@ -129,7 +129,12 @@ RUN apk update && apk add --no-cache \
   git \
   vips \
   python3 \
+  python3-dev \
   py3-pip \
+  py3-numpy \
+  openblas-dev \
+  gfortran \
+  lapack-dev \
   && gem install bundler
 
 COPY --from=node /usr/local/bin/node /usr/local/bin/
