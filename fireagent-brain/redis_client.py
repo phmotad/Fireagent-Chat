@@ -18,11 +18,15 @@ class RedisClient:
     def _connect(self):
         """Connect to Redis."""
         try:
-            self.client = redis.from_url(
-                settings.redis_url,
-                password=settings.redis_password,
-                decode_responses=True
-            )
+            # Se REDIS_URL já contém senha (redis://:password@host), não passar password
+            # Caso contrário, usar REDIS_PASSWORD se disponível
+            redis_kwargs = {"decode_responses": True}
+
+            # Só adiciona password se REDIS_URL não contém senha e REDIS_PASSWORD existe
+            if settings.redis_password and ':' not in settings.redis_url.split('@')[0].split('//')[1]:
+                redis_kwargs["password"] = settings.redis_password
+
+            self.client = redis.from_url(settings.redis_url, **redis_kwargs)
             self.client.ping()
             logger.info("Redis connection established")
         except Exception as e:

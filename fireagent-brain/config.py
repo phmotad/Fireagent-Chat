@@ -10,8 +10,8 @@ class Settings(BaseSettings):
     # API Keys
     gemini_api_key: str = os.getenv("GEMINI_API_KEY", "")
     
-    # Database
-    postgres_url: str = os.getenv("POSTGRES_URL", "postgresql://localhost:5432/chatwoot")
+    # Database (usa mesma variável que o Chatwoot)
+    postgres_url: str = os.getenv("DATABASE_URL", os.getenv("POSTGRES_URL", "postgresql://localhost:5432/chatwoot"))
     
     # Redis
     redis_url: str = os.getenv("REDIS_URL", "redis://localhost:6379")
