@@ -2,7 +2,7 @@
 import google.generativeai as genai
 from typing import List, Dict, Any, Optional
 from config import settings
-from models import AiAgent, AgentResponse, ToolCall
+from models import AiAgent, AgentResponse, ToolCall, AiAgentTool
 from embeddings import embedding_model
 import logging
 import json
@@ -165,6 +165,166 @@ class GeminiClient:
         except Exception as e:
             logger.error(f"Error generating embedding: {e}")
             return []
+
+    def convert_tools_to_gemini_format(self, tools: List[AiAgentTool]) -> List[Dict[str, Any]]:
+        """
+        Convert AI Agent tools to Gemini function calling format.
+
+        Args:
+            tools: List of AI Agent tools
+
+        Returns:
+            List of tool declarations in Gemini format
+        """
+        gemini_tools = []
+
+        for tool in tools:
+            if not tool.enabled:
+                continue
+
+            try:
+                tool_declaration = {
+                    "name": tool.name,
+                    "description": tool.description or f"Execute {tool.name}",
+                    "parameters": self._get_tool_parameters(tool)
+                }
+                gemini_tools.append(tool_declaration)
+            except Exception as e:
+                logger.error(f"Error converting tool {tool.name}: {str(e)}")
+
+        return gemini_tools
+
+    def _get_tool_parameters(self, tool: AiAgentTool) -> Dict[str, Any]:
+        """
+        Get parameter schema for a tool.
+
+        Args:
+            tool: AI Agent tool
+
+        Returns:
+            Parameter schema in JSON Schema format
+        """
+        config = tool.configuration
+
+        if tool.tool_type in ['http', 'https']:
+            # HTTP tools can accept dynamic parameters
+            return {
+                "type": "object",
+                "properties": {
+                    "params": {
+                        "type": "object",
+                        "description": "Parameters to pass to the HTTP endpoint"
+                    }
+                },
+                "required": []
+            }
+
+        elif tool.tool_type == 'native':
+            native_type = config.get('native_type')
+
+            if native_type == 'macro':
+                return {
+                    "type": "object",
+                    "properties": {
+                        "conversation_id": {
+                            "type": "integer",
+                            "description": "ID of the conversation"
+                        }
+                    },
+                    "required": ["conversation_id"]
+                }
+
+            elif native_type == 'schedule':
+                schedule_action = config.get('schedule_action', 'create')
+
+                if schedule_action == 'create':
+                    return {
+                        "type": "object",
+                        "properties": {
+                            "datetime": {
+                                "type": "string",
+                                "description": "ISO format datetime for the appointment"
+                            },
+                            "description": {
+                                "type": "string",
+                                "description": "Description of the appointment"
+                            }
+                        },
+                        "required": ["datetime", "description"]
+                    }
+                elif schedule_action == 'list':
+                    return {
+                        "type": "object",
+                        "properties": {},
+                        "required": []
+                    }
+                elif schedule_action == 'delete':
+                    return {
+                        "type": "object",
+                        "properties": {
+                            "schedule_id": {
+                                "type": "integer",
+                                "description": "ID of the schedule to delete"
+                            }
+                        },
+                        "required": ["schedule_id"]
+                    }
+                elif schedule_action == 'reschedule':
+                    return {
+                        "type": "object",
+                        "properties": {
+                            "schedule_id": {
+                                "type": "integer",
+                                "description": "ID of the schedule"
+                            },
+                            "new_datetime": {
+                                "type": "string",
+                                "description": "New ISO format datetime"
+                            }
+                        },
+                        "required": ["schedule_id", "new_datetime"]
+                    }
+
+            elif native_type == 'handover':
+                return {
+                    "type": "object",
+                    "properties": {
+                        "conversation_id": {
+                            "type": "integer",
+                            "description": "ID of the conversation to hand over"
+                        },
+                        "reason": {
+                            "type": "string",
+                            "description": "Reason for handover"
+                        }
+                    },
+                    "required": ["conversation_id"]
+                }
+
+        elif tool.tool_type == 'mcp':
+            # MCP tools may have custom argument schemas
+            arguments_schema = config.get('arguments_schema')
+            if arguments_schema:
+                try:
+                    if isinstance(arguments_schema, str):
+                        return json.loads(arguments_schema)
+                    return arguments_schema
+                except json.JSONDecodeError:
+                    logger.warning(f"Invalid arguments_schema for MCP tool {tool.name}")
+
+            # Default MCP parameters
+            return {
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
+
+        # Default fallback
+        return {
+            "type": "object",
+            "properties": {},
+            "required": []
+        }
 
 
 # Global Gemini client

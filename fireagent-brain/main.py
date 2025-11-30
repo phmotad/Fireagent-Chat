@@ -16,6 +16,7 @@ from rag_engine import rag_engine
 from tools import HandoverTool, AddLabelTool, SchedulingTool, WhatsAppButtonsTool, RunMacroTool
 from multimodal_processor import multimodal_processor
 from criteria_evaluator import criteria_evaluator
+from document_processor import document_processor
 
 # Configure logging
 logging.basicConfig(

@@ -189,15 +189,18 @@ services:
 
   fireagent-brain:
     image: 'ghcr.io/phmotad/fireagent-chat:latest'
+    pull_policy: always
     restart: always
     environment:
       - REDIS_URL=redis://redis:6379
+      - REDIS_PASSWORD=${SERVICE_PASSWORD_REDIS}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - POSTGRES_URL=postgresql://${SERVICE_USER_POSTGRES}:${SERVICE_PASSWORD_POSTGRES}@postgres:5432/${POSTGRES_DB:-chatwoot_production}
+      - CHATWOOT_URL=${CHATWOOT_URL:-http://rails:3000}
     command:
       - sh
       - '-c'
-      - 'cd fireagent-brain && uvicorn main:app --host 0.0.0.0 --port 8000'
+      - 'cd /app/fireagent-brain && uvicorn main:app --host 0.0.0.0 --port 8000'
     depends_on:
       - redis
       - postgres

@@ -103,8 +103,18 @@ export default {
         this.fetchAgent();
       },
     },
+    '$route.name': {
+      handler() {
+        // Reload agents list when switching tabs to catch any deletions
+        this.fetchAgents();
+      },
+    },
   },
   mounted() {
+    this.fetchAgents();
+  },
+  activated() {
+    // Reload when component is reactivated (keep-alive)
     this.fetchAgents();
   },
   methods: {

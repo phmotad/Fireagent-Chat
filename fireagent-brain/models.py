@@ -43,8 +43,10 @@ class AiAgentTool(BaseModel):
     ai_agent_id: int
     name: str
     description: Optional[str] = None
-    type: str  # 'mcp', 'function', 'api'
-    config: Dict[str, Any] = {}
+    tool_type: str  # 'native', 'http', 'https', 'mcp'
+    configuration: Dict[str, Any] = {}
+    conditions: Dict[str, Any] = {}
+    enabled: bool = True
 
 
 class WebhookPayload(BaseModel):

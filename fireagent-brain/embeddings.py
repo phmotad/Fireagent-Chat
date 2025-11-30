@@ -1,5 +1,5 @@
-"""Local embeddings using Sentence Transformers."""
-from sentence_transformers import SentenceTransformer
+"""Embeddings using Google Gemini API."""
+import google.generativeai as genai
 from typing import List
 import logging
 import os
@@ -8,45 +8,32 @@ logger = logging.getLogger(__name__)
 
 
 class EmbeddingModel:
-    """Local embedding model using Sentence Transformers."""
+    """Embedding model using Google Gemini API."""
 
-    def __init__(self, model_name: str = "paraphrase-multilingual-mpnet-base-v2"):
-        """
-        Initialize the embedding model.
+    def __init__(self):
+        """Initialize the embedding model."""
+        self.model_name = "models/text-embedding-004"
+        self.dimension = 768  # Default dimension for text-embedding-004
+        self.configured = False
+        logger.info(f"Embedding model initialized: {self.model_name}")
 
-        Args:
-            model_name: Name of the sentence-transformers model to use
-                       Default: paraphrase-multilingual-mpnet-base-v2 (supports Portuguese)
-        """
-        self.model_name = model_name
-        self.model = None
-        self._load_model()
+    def _ensure_configured(self):
+        """Ensure Gemini API is configured."""
+        if not self.configured:
+            api_key = os.getenv("GEMINI_API_KEY")
+            if not api_key:
+                logger.warning("GEMINI_API_KEY not set. Embeddings will fail.")
+                return False
 
-    def _load_model(self):
-        """Load the embedding model (lazy loading)."""
-        try:
-            logger.info(f"Loading embedding model: {self.model_name}")
+            genai.configure(api_key=api_key)
+            self.configured = True
+            logger.info("Gemini API configured for embeddings")
 
-            # Create cache directory if it doesn't exist
-            cache_dir = os.path.join("/app", ".cache", "sentence-transformers")
-            os.makedirs(cache_dir, exist_ok=True)
-
-            self.model = SentenceTransformer(
-                self.model_name,
-                cache_folder=cache_dir
-            )
-
-            # Get embedding dimension
-            self.dimension = self.model.get_sentence_embedding_dimension()
-            logger.info(f"Embedding model loaded successfully. Dimension: {self.dimension}")
-
-        except Exception as e:
-            logger.error(f"Error loading embedding model: {e}")
-            raise
+        return True
 
     def encode(self, text: str) -> List[float]:
         """
-        Generate embedding for text.
+        Generate embedding for text using Gemini API.
 
         Args:
             text: Text to embed
@@ -54,18 +41,22 @@ class EmbeddingModel:
         Returns:
             Embedding vector as list of floats
         """
-        if not self.model:
-            self._load_model()
+        if not self._ensure_configured():
+            logger.error("Gemini API not configured. Returning empty embedding.")
+            return []
 
         try:
-            # Generate embedding
-            embedding = self.model.encode(
-                text,
-                convert_to_numpy=True,
-                normalize_embeddings=True  # Normalize for cosine similarity
+            # Generate embedding using Gemini API
+            result = genai.embed_content(
+                model=self.model_name,
+                content=text,
+                task_type="retrieval_document"  # For RAG use case
             )
 
-            return embedding.tolist()
+            embedding = result['embedding']
+            logger.debug(f"Generated embedding with dimension: {len(embedding)}")
+
+            return embedding
 
         except Exception as e:
             logger.error(f"Error generating embedding: {e}")
@@ -73,7 +64,7 @@ class EmbeddingModel:
 
     def encode_batch(self, texts: List[str]) -> List[List[float]]:
         """
-        Generate embeddings for multiple texts (more efficient).
+        Generate embeddings for multiple texts.
 
         Args:
             texts: List of texts to embed
@@ -81,19 +72,37 @@ class EmbeddingModel:
         Returns:
             List of embedding vectors
         """
-        if not self.model:
-            self._load_model()
+        if not self._ensure_configured():
+            logger.error("Gemini API not configured. Returning empty embeddings.")
+            return []
 
         try:
-            embeddings = self.model.encode(
-                texts,
-                convert_to_numpy=True,
-                normalize_embeddings=True,
-                batch_size=32,
-                show_progress_bar=False
-            )
+            # Gemini API supports batch embedding
+            embeddings = []
 
-            return embeddings.tolist()
+            # Process in batches of 100 (Gemini API limit)
+            batch_size = 100
+            for i in range(0, len(texts), batch_size):
+                batch = texts[i:i + batch_size]
+
+                result = genai.embed_content(
+                    model=self.model_name,
+                    content=batch,
+                    task_type="retrieval_document"
+                )
+
+                # Extract embeddings from result
+                if isinstance(result, dict) and 'embedding' in result:
+                    # Single embedding
+                    embeddings.append(result['embedding'])
+                elif isinstance(result, list):
+                    # Multiple embeddings
+                    embeddings.extend([r['embedding'] for r in result])
+                else:
+                    logger.warning(f"Unexpected result format: {type(result)}")
+
+            logger.debug(f"Generated {len(embeddings)} embeddings")
+            return embeddings
 
         except Exception as e:
             logger.error(f"Error generating batch embeddings: {e}")

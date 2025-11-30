@@ -31,17 +31,9 @@ class AiAgents::MessageProcessorJob < ApplicationJob
 
   def build_payload
     {
-      agent_id: @ai_agent.id,
-      message: {
-        id: @message.id,
-        content: @message.content,
-        message_type: @message.message_type,
-        created_at: @message.created_at,
-        sender: {
-          id: @message.sender_id,
-          name: @message.sender&.name,
-          email: @message.sender&.email
-        }
+      event: 'message_created',
+      account: {
+        id: @conversation.account_id
       },
       conversation: {
         id: @conversation.id,
@@ -50,8 +42,26 @@ class AiAgents::MessageProcessorJob < ApplicationJob
         account_id: @conversation.account_id,
         contact_id: @conversation.contact_id
       },
-      account: {
-        id: @conversation.account_id
+      message: {
+        id: @message.id,
+        content: @message.content,
+        message_type: @message.message_type,
+        created_at: @message.created_at,
+        attachments: @message.attachments.map do |attachment|
+          {
+            file_type: attachment.file_type,
+            data_url: attachment.file_url
+          }
+        end
+      },
+      sender: {
+        id: @message.sender_id,
+        name: @message.sender&.name,
+        email: @message.sender&.email
+      },
+      inbox: {
+        id: @conversation.inbox_id,
+        name: @conversation.inbox&.name
       }
     }
   end

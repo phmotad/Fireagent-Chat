@@ -38,18 +38,55 @@ class AiAgents::ProcessKnowledgeSourceJob < ApplicationJob
 
   def read_file_content
     file_path = @knowledge_source.file_path
+    content = nil
 
     # Check if it's a URL
     if file_path.start_with?('http://', 'https://')
-      download_from_url(file_path)
+      content = download_from_url(file_path)
     # Check if it's an ActiveStorage attachment
     elsif @knowledge_source.respond_to?(:document) && @knowledge_source.document.attached?
-      @knowledge_source.document.download
+      content = @knowledge_source.document.download
     # Check if it's a local file path
     elsif File.exist?(file_path)
-      File.read(file_path)
+      content = File.read(file_path)
     else
       raise "File not found: #{file_path}"
+    end
+
+    # Extract text from PDF if needed
+    if file_path.downcase.end_with?('.pdf')
+      extract_text_from_pdf(content)
+    else
+      content
+    end
+  end
+
+  def extract_text_from_pdf(pdf_content)
+    require 'pdf-reader'
+
+    begin
+      reader = PDF::Reader.new(StringIO.new(pdf_content))
+      text_parts = []
+
+      reader.pages.each_with_index do |page, index|
+        begin
+          text = page.text
+          text_parts << text if text.present?
+        rescue StandardError => e
+          Rails.logger.warn("Error extracting text from page #{index}: #{e.message}")
+        end
+      end
+
+      extracted_text = text_parts.join("\n\n")
+
+      if extracted_text.blank?
+        raise "No text could be extracted from PDF"
+      end
+
+      Rails.logger.info("Extracted #{extracted_text.length} characters from PDF with #{reader.page_count} pages")
+      extracted_text
+    rescue StandardError => e
+      raise "Failed to extract text from PDF: #{e.message}"
     end
   end
 

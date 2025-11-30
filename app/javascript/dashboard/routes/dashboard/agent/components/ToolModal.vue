@@ -79,8 +79,10 @@
               class="w-full px-3 py-2 border border-n-weak rounded bg-n-background text-n-slate-12"
               required
             >
-              <option value="">Carregando macros...</option>
-              <!-- Macros will be loaded dynamically -->
+              <option value="">{{ loadingMacros ? 'Carregando macros...' : 'Selecione uma macro' }}</option>
+              <option v-for="macro in macros" :key="macro.id" :value="macro.id">
+                {{ macro.name }}
+              </option>
             </select>
             <p class="text-xs text-n-slate-10 mt-1">
               Selecione a macro que será executada pelo agente
@@ -89,6 +91,23 @@
 
           <!-- Schedule Configuration -->
           <div v-if="form.configuration.native_type === 'schedule'" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-2 text-n-slate-12">Regra de Agendamento</label>
+              <select
+                v-model="form.configuration.scheduling_rule_id"
+                class="w-full px-3 py-2 border border-n-weak rounded bg-n-background text-n-slate-12"
+                required
+              >
+                <option value="">{{ loadingSchedulingRules ? 'Carregando regras...' : 'Selecione uma regra' }}</option>
+                <option v-for="rule in schedulingRules" :key="rule.id" :value="rule.id">
+                  {{ rule.name }} - {{ rule.location }} (Cap: {{ rule.capacity }} pessoas)
+                </option>
+              </select>
+              <p class="text-xs text-n-slate-10 mt-1">
+                Selecione a regra que define local, capacidade e horários disponíveis
+              </p>
+            </div>
+
             <div>
               <label class="block text-sm font-medium mb-2 text-n-slate-12">Ação do Agendamento</label>
               <select
@@ -296,6 +315,10 @@ export default {
   data() {
     return {
       saving: false,
+      loadingMacros: false,
+      loadingSchedulingRules: false,
+      macros: [],
+      schedulingRules: [],
       form: {
         name: '',
         description: '',
@@ -330,6 +353,17 @@ export default {
       return !!this.tool;
     },
   },
+  watch: {
+    'form.configuration.native_type': {
+      handler(newType) {
+        if (newType === 'macro') {
+          this.fetchMacros();
+        } else if (newType === 'schedule') {
+          this.fetchSchedulingRules();
+        }
+      },
+    },
+  },
   mounted() {
     if (this.tool) {
       this.form = {
@@ -337,8 +371,41 @@ export default {
         configuration: { ...this.tool.configuration },
       };
     }
+
+    // Load macros and rules if already selected
+    if (this.form.configuration.native_type === 'macro') {
+      this.fetchMacros();
+    } else if (this.form.configuration.native_type === 'schedule') {
+      this.fetchSchedulingRules();
+    }
   },
   methods: {
+    async fetchMacros() {
+      try {
+        this.loadingMacros = true;
+        const response = await axios.get(`/api/v1/accounts/${this.accountId}/macros`);
+        this.macros = response.data.payload || [];
+      } catch (error) {
+        console.error('Error loading macros:', error);
+        useAlert('Erro ao carregar macros');
+      } finally {
+        this.loadingMacros = false;
+      }
+    },
+
+    async fetchSchedulingRules() {
+      try {
+        this.loadingSchedulingRules = true;
+        const response = await axios.get(`/api/v1/accounts/${this.accountId}/scheduling_rules`);
+        this.schedulingRules = response.data || [];
+      } catch (error) {
+        console.error('Error loading scheduling rules:', error);
+        useAlert('Erro ao carregar regras de agendamento');
+      } finally {
+        this.loadingSchedulingRules = false;
+      }
+    },
+
     async saveTool() {
       try {
         this.saving = true;
@@ -354,7 +421,8 @@ export default {
         useAlert(this.isEdit ? 'Ferramenta atualizada com sucesso' : 'Ferramenta criada com sucesso');
         this.$emit('save');
       } catch (error) {
-        useAlert('Erro ao salvar ferramenta');
+        console.error('Error saving tool:', error);
+        useAlert(error?.response?.data?.message || 'Erro ao salvar ferramenta');
       } finally {
         this.saving = false;
       }

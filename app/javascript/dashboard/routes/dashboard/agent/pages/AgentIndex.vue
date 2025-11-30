@@ -3,7 +3,6 @@
 import { useAccount } from 'dashboard/composables/useAccount';
 import { useAlert } from 'dashboard/composables';
 import { useAdmin } from 'dashboard/composables/useAdmin';
-import BaseSettingsHeader from '../../settings/components/BaseSettingsHeader.vue';
 import { computed, ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Button from 'dashboard/components-next/button/Button.vue';
@@ -63,23 +62,28 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex-1 overflow-auto">
-    <BaseSettingsHeader
-      title="Agentes de IA"
-      description="Gerencie seus agentes de IA personalizados com integração Gemini"
-      link-text="Saiba mais"
-      feature-name="ai_agents"
-    >
-      <template #actions>
-        <router-link v-if="isAdmin" :to="{ name: 'agent_new' }">
+  <div class="flex flex-col h-full w-full">
+    <!-- Header -->
+    <div class="border-b border-n-weak p-6">
+      <div class="flex items-center justify-between mb-2">
+        <div>
+          <h2 class="text-2xl font-semibold text-n-slate-12">Agentes de IA</h2>
+          <p class="text-sm text-n-slate-11 mt-1">
+            Gerencie seus agentes de IA personalizados com integração Gemini
+          </p>
+        </div>
+        <router-link v-if="isAdmin" :to="{ name: 'agent_settings_new' }">
           <Button
             icon="i-lucide-circle-plus"
             label="Novo Agente"
           />
         </router-link>
-      </template>
-    </BaseSettingsHeader>
-    <div class="mt-6 flex-1 text-n-slate-11">
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 overflow-auto p-6">
+      <div class="max-w-5xl mx-auto">
       <woot-loading-state
         v-if="loading"
         message="Carregando agentes..."
@@ -97,7 +101,7 @@ onMounted(() => {
             v-for="agent in agents"
             :key="agent.id"
             class="cursor-pointer hover:bg-n-solid-2 transition-colors"
-            @click="$router.push({ name: 'agent_settings', params: { agentId: agent.id } })"
+            @click="$router.push({ name: 'agent_settings_edit', params: { agentId: agent.id } })"
           >
             <td class="py-4 ltr:pr-4 rtl:pl-4">
               <span class="block font-medium capitalize">{{ agent.name }}</span>
@@ -112,7 +116,7 @@ onMounted(() => {
             <td class="py-4 flex justify-end gap-1" @click.stop>
               <router-link
                 :to="{
-                  name: 'agent_settings',
+                  name: 'agent_settings_edit',
                   params: { agentId: agent.id },
                 }"
               >
@@ -140,6 +144,7 @@ onMounted(() => {
           </tr>
         </tbody>
       </table>
+      </div>
     </div>
     <woot-confirm-delete-modal
       v-if="showDeletePopup"

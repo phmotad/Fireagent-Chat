@@ -1,12 +1,28 @@
 <template>
-  <div class="flex flex-col h-full p-6">
-    <div class="max-w-5xl">
-      <div class="mb-6">
-        <h2 class="text-2xl font-semibold mb-2 text-n-slate-12">Base de Conhecimento</h2>
-        <p class="text-n-slate-11">
-          Gerencie os documentos e fontes de conhecimento do agente
-        </p>
+  <div class="flex flex-col h-full w-full">
+    <!-- Header -->
+    <div class="border-b border-n-weak p-6">
+      <div class="flex items-center gap-3 mb-2">
+        <router-link
+          :to="{ name: 'agent_knowledge' }"
+          class="text-n-slate-11 hover:text-n-slate-12 transition-colors"
+        >
+          <i class="i-lucide-arrow-left text-xl" />
+        </router-link>
+        <div>
+          <h2 class="text-2xl font-semibold text-n-slate-12">Base de Conhecimento</h2>
+          <p v-if="currentAgent" class="text-sm text-n-slate-11 mt-1">
+            Agente: {{ currentAgent.name }}
+          </p>
+        </div>
       </div>
+      <p class="text-n-slate-11">
+        Gerencie os documentos e fontes de conhecimento do agente
+      </p>
+    </div>
+
+    <div class="flex-1 overflow-auto p-6">
+      <div class="max-w-5xl mx-auto">
 
       <!-- Add Knowledge Source -->
       <div class="bg-n-background rounded-lg border border-n-weak p-6 mb-6">
@@ -125,8 +141,8 @@
                   ></i>
                   {{ getStatusLabel(source.status) }}
                 </span>
-                <span v-if="source.status === 'failed'" class="text-xs text-red-600">
-                  (Possível erro de quota da API Gemini)
+                <span v-if="source.status === 'failed' && source.metadata && source.metadata.error" class="text-xs text-red-600">
+                  {{ source.metadata.error }}
                 </span>
               </div>
             </div>
@@ -150,6 +166,7 @@
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   </div>
@@ -175,6 +192,7 @@ export default {
       knowledgeSources: [],
       newKnowledgePath: '',
       selectedFile: null,
+      currentAgent: null,
     };
   },
   computed: {
@@ -184,9 +202,21 @@ export default {
     },
   },
   mounted() {
+    this.fetchAgent();
     this.fetchKnowledge();
   },
   methods: {
+    async fetchAgent() {
+      try {
+        const response = await axios.get(
+          `/api/v1/accounts/${this.accountId}/ai_agents/${this.agentId}`
+        );
+        this.currentAgent = response.data;
+      } catch (error) {
+        useAlert('Erro ao carregar agente');
+      }
+    },
+
     async fetchKnowledge() {
       try {
         this.loading = true;

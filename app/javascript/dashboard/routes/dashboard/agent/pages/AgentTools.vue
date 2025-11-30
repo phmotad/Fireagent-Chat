@@ -1,20 +1,38 @@
 <template>
-  <div class="flex h-full">
-    <!-- Main Content -->
-    <div class="flex-1 overflow-auto p-8">
-      <div class="mb-6">
-        <div class="flex items-center justify-between mb-2">
-          <h2 class="text-2xl font-semibold text-n-slate-12">Ferramentas do Agente</h2>
-          <Button
-            icon="i-lucide-plus"
-            label="Nova Ferramenta"
-            @click="openToolModal()"
-          />
+  <div class="flex flex-col h-full w-full">
+    <!-- Header -->
+    <div class="border-b border-n-weak p-6">
+      <div class="flex items-center gap-3 mb-2">
+        <router-link
+          :to="{ name: 'agent_tools' }"
+          class="text-n-slate-11 hover:text-n-slate-12 transition-colors"
+        >
+          <i class="i-lucide-arrow-left text-xl" />
+        </router-link>
+        <div class="flex-1">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-2xl font-semibold text-n-slate-12">Ferramentas do Agente</h2>
+              <p v-if="currentAgent" class="text-sm text-n-slate-11 mt-1">
+                Agente: {{ currentAgent.name }}
+              </p>
+            </div>
+            <Button
+              icon="i-lucide-plus"
+              label="Nova Ferramenta"
+              @click="openToolModal()"
+            />
+          </div>
         </div>
-        <p class="text-n-slate-11">
-          Configure as ferramentas que o agente pode usar durante as conversas
-        </p>
       </div>
+      <p class="text-n-slate-11">
+        Configure as ferramentas que o agente pode usar durante as conversas
+      </p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 overflow-auto p-6">
+      <div class="max-w-5xl mx-auto">
 
       <!-- Tools List -->
       <div v-if="loading" class="flex items-center justify-center py-12">
@@ -110,6 +128,7 @@
           </div>
         </div>
       </div>
+      </div>
     </div>
 
     <!-- Tool Modal -->
@@ -161,6 +180,7 @@ export default {
       selectedTool: null,
       showDeleteModal: false,
       toolToDelete: null,
+      currentAgent: null,
     };
   },
   computed: {
@@ -179,9 +199,21 @@ export default {
     },
   },
   mounted() {
+    this.fetchAgent();
     this.fetchTools();
   },
   methods: {
+    async fetchAgent() {
+      try {
+        const response = await axios.get(
+          `/api/v1/accounts/${this.accountId}/ai_agents/${this.agentId}`
+        );
+        this.currentAgent = response.data;
+      } catch (error) {
+        useAlert('Erro ao carregar agente');
+      }
+    },
+
     async fetchTools() {
       try {
         this.loading = true;

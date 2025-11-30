@@ -1,8 +1,33 @@
 <template>
-  <div class="flex h-full gap-6 p-8">
-    <!-- Left Column: Configuration Form -->
-    <div class="flex-1 overflow-auto pr-6">
-      <form @submit.prevent="saveAgent">
+  <div class="flex flex-col h-full w-full">
+    <!-- Header -->
+    <div class="border-b border-n-weak p-6">
+      <div class="flex items-center gap-3 mb-2">
+        <router-link
+          :to="{ name: 'agent_settings' }"
+          class="text-n-slate-11 hover:text-n-slate-12 transition-colors"
+        >
+          <i class="i-lucide-arrow-left text-xl" />
+        </router-link>
+        <div>
+          <h2 class="text-2xl font-semibold text-n-slate-12">
+            {{ isNew ? 'Novo Agente' : 'Editar Agente' }}
+          </h2>
+          <p v-if="!isNew && agent.name" class="text-sm text-n-slate-11 mt-1">
+            {{ agent.name }}
+          </p>
+        </div>
+      </div>
+      <p class="text-n-slate-11">
+        {{ isNew ? 'Crie um novo agente de IA com integração Gemini' : 'Configure seu agente de IA e teste suas respostas' }}
+      </p>
+    </div>
+
+    <!-- Content -->
+    <div class="flex flex-1 overflow-hidden gap-6 p-6">
+      <!-- Left Column: Configuration Form -->
+      <div class="flex-1 overflow-auto pr-6">
+        <form @submit.prevent="saveAgent">
         <div class="space-y-6">
           <!-- Basic Info -->
           <div class="bg-n-background rounded-lg border border-n-weak p-6">
@@ -109,9 +134,9 @@
           </div>
         </div>
       </form>
-    </div>
+      </div>
 
-    <!-- Right Column: Test Chat Panel -->
+      <!-- Right Column: Test Chat Panel -->
     <div v-if="!isNew" class="w-[480px] flex flex-col border-l border-n-weak bg-n-solid-2 pl-6">
       <div class="flex-1 flex flex-col">
         <div class="flex items-center justify-between mb-4">
@@ -184,6 +209,7 @@
           />
         </div>
       </div>
+    </div>
     </div>
   </div>
 </template>
@@ -259,7 +285,7 @@ export default {
           );
           useAlert('Agente criado com sucesso');
           this.$router.push({
-            name: 'agent_settings',
+            name: 'agent_settings_edit',
             params: { accountId: this.accountId, agentId: response.data.id },
           });
         } else {

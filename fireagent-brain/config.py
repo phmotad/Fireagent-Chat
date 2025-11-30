@@ -13,9 +13,9 @@ class Settings(BaseSettings):
     # Database (usa mesma variável que o Chatwoot)
     postgres_url: str = os.getenv("DATABASE_URL", os.getenv("POSTGRES_URL", "postgresql://localhost:5432/chatwoot"))
     
-    # Redis
+    # Redis (usa SERVICE_PASSWORD_REDIS se REDIS_PASSWORD não estiver definido)
     redis_url: str = os.getenv("REDIS_URL", "redis://localhost:6379")
-    redis_password: Optional[str] = os.getenv("REDIS_PASSWORD")
+    redis_password: Optional[str] = os.getenv("REDIS_PASSWORD") or os.getenv("SERVICE_PASSWORD_REDIS")
     redis_ttl: int = 86400  # 24 hours
     
     # Chatwoot
