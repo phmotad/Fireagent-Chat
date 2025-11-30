@@ -16,6 +16,7 @@ const props = defineProps({
   activeOn: { type: Array, default: () => [] },
   children: { type: Array, default: undefined },
   getterKeys: { type: Object, default: () => ({}) },
+  alwaysExpanded: { type: Boolean, default: false },
 });
 
 const {
@@ -33,7 +34,7 @@ const navigableChildren = computed(() => {
 
 const route = useRoute();
 const router = useRouter();
-const isExpanded = computed(() => expandedItem.value === props.name);
+const isExpanded = computed(() => props.alwaysExpanded || expandedItem.value === props.name);
 const isExpandable = computed(() => props.children);
 const hasChildren = computed(
   () => Array.isArray(props.children) && props.children.length > 0

@@ -133,6 +133,7 @@ const agentMenuItems = computed(() => {
     icon: 'i-lucide-bot',
     to: accountScopedRoute('agent_index'),
     activeOn: ['agent_index', 'agent_new', 'agent_settings', 'agent_inboxes', 'agent_knowledge', 'agent_tools'],
+    alwaysExpanded: true,
     children: [
       {
         name: 'Agent Settings',
