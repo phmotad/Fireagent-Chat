@@ -82,6 +82,7 @@ class Account < ApplicationRecord
   has_many :inboxes, dependent: :destroy_async
   has_many :labels, dependent: :destroy_async
   has_many :line_channels, dependent: :destroy_async, class_name: '::Channel::Line'
+  has_many :llm_providers, dependent: :destroy_async
   has_many :mentions, dependent: :destroy_async
   has_many :messages, dependent: :destroy_async
   has_many :notes, dependent: :destroy_async
@@ -97,6 +98,7 @@ class Account < ApplicationRecord
   has_many :web_widgets, dependent: :destroy_async, class_name: '::Channel::WebWidget'
   has_many :webhooks, dependent: :destroy_async
   has_many :whatsapp_channels, dependent: :destroy_async, class_name: '::Channel::Whatsapp'
+  has_many :whatsapp_flows, dependent: :destroy_async
   has_many :working_hours, dependent: :destroy_async
   has_many :kanban_boards, dependent: :destroy_async
   has_many :kanban_locations, dependent: :destroy_async
